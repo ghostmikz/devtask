@@ -25,6 +25,8 @@ public class Task implements Serializable {
     private String statusName;
     private String statusColor;
     private String statusType;
+    // "userId:Full Name|userId:Full Name" — populated by sp_get_tasks_by_project
+    private String assigneesCsv;
 
     public Task() {}
 
@@ -78,6 +80,9 @@ public class Task implements Serializable {
 
     public String getStatusType()           { return statusType; }
     public void setStatusType(String v)     { statusType = v; }
+
+    public String getAssigneesCsv()         { return assigneesCsv; }
+    public void setAssigneesCsv(String v)   { assigneesCsv = v; }
 
     public boolean isDone() {
         return "done".equalsIgnoreCase(statusType);

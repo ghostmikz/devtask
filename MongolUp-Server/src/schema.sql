@@ -442,7 +442,12 @@ END$$
 DROP PROCEDURE IF EXISTS sp_get_tasks_by_project$$
 CREATE PROCEDURE sp_get_tasks_by_project(IN p_project_id INT)
 BEGIN
-    SELECT t.*, s.name AS status_name, s.color AS status_color, s.type AS status_type
+    SELECT t.*, s.name AS status_name, s.color AS status_color, s.type AS status_type,
+           (SELECT GROUP_CONCAT(CONCAT(u.user_id, ':', COALESCE(u.full_name, u.username))
+                    ORDER BY u.full_name SEPARATOR '|')
+            FROM task_assignments ta
+            JOIN users u ON u.user_id = ta.user_id
+            WHERE ta.task_id = t.task_id) AS assignees_csv
     FROM tasks t
     LEFT JOIN statuses s ON s.status_id = t.status_id
     WHERE t.project_id = p_project_id

@@ -214,8 +214,9 @@ public class TaskDAO {
         if (cr != null) t.setCreatedAt(new java.util.Date(cr.getTime()));
         Timestamp upd = rs.getTimestamp("updated_at");
         if (upd != null) t.setUpdatedAt(new java.util.Date(upd.getTime()));
-        try { t.setStatusName(rs.getString("status_name"));   } catch (SQLException ignored) {}
-        try { t.setStatusColor(rs.getString("status_color")); } catch (SQLException ignored) {}
-        try { t.setStatusType(rs.getString("status_type"));   } catch (SQLException ignored) {}
+        try { t.setStatusName(rs.getString("status_name"));     } catch (SQLException ignored) {}
+        try { t.setStatusColor(rs.getString("status_color"));   } catch (SQLException ignored) {}
+        try { t.setStatusType(rs.getString("status_type"));     } catch (SQLException ignored) {}
+        try { t.setAssigneesCsv(rs.getString("assignees_csv")); } catch (SQLException ignored) {}
     }
 }

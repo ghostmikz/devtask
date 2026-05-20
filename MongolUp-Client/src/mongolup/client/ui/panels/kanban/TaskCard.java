@@ -2,6 +2,7 @@ package mongolup.client.ui.panels.kanban;
 
 import mongolup.client.i18n.I18n;
 import mongolup.server.model.Task;
+import mongolup.client.ui.components.AvatarLabel;
 import mongolup.client.ui.components.TagLabel;
 
 import javax.swing.*;
@@ -29,6 +30,12 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
     private static final Color HOVER_BDR = new Color(0xC8C8C5);
     private static final Color TEXT_PRI  = new Color(0x1A1A18);
     private static final Color TEXT_SEC  = new Color(0x888780);
+
+    private static final Color[] AVATAR_PAL = {
+        new Color(0x0F6E56), new Color(0x7C3AED),
+        new Color(0x2563EB), new Color(0xD97706),
+        new Color(0xDB2777), new Color(0x059669)
+    };
 
     private final Task task;
     private final Runnable onClick;
@@ -97,6 +104,35 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             tags.add(new TagLabel(task.getStatusName(), tagBg, tagFg));
             add(tags);
             add(Box.createVerticalStrut(8));
+        }
+
+        // Assignee avatars
+        String csv = task.getAssigneesCsv();
+        if (csv != null && !csv.isBlank()) {
+            String[] parts = csv.split("\\|");
+            JPanel avatarRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
+            avatarRow.setOpaque(false);
+            avatarRow.setAlignmentX(LEFT_ALIGNMENT);
+            int shown = Math.min(parts.length, 4);
+            for (int i = 0; i < shown; i++) {
+                String[] kv = parts[i].split(":", 2);
+                int uid = 0;
+                String name = parts[i];
+                if (kv.length == 2) {
+                    try { uid = Integer.parseInt(kv[0]); } catch (NumberFormatException ignored) {}
+                    name = kv[1];
+                }
+                Color col = AVATAR_PAL[Math.abs(uid > 0 ? uid : i) % AVATAR_PAL.length];
+                avatarRow.add(new AvatarLabel(computeInitials(name), col, 20));
+            }
+            if (parts.length > 4) {
+                JLabel more = new JLabel("+" + (parts.length - 4));
+                more.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                more.setForeground(TEXT_SEC);
+                avatarRow.add(more);
+            }
+            add(avatarRow);
+            add(Box.createVerticalStrut(6));
         }
 
         // Footer: points dot + weight
@@ -173,5 +209,16 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
     private Color parseHex(String hex, Color fallback) {
         try { return hex != null ? Color.decode(hex) : fallback; }
         catch (NumberFormatException e) { return fallback; }
+    }
+
+    /** "John Doe" → "JD",  "alice" → "A" */
+    private String computeInitials(String name) {
+        if (name == null || name.isBlank()) return "?";
+        String[] words = name.trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String w : words) {
+            if (!w.isEmpty()) sb.appendCodePoint(w.codePointAt(0));
+        }
+        return sb.toString().toUpperCase();
     }
 }
