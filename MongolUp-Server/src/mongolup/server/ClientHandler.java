@@ -19,12 +19,14 @@ public class ClientHandler implements Runnable {
     private User currentUser;    // set after successful login/register
     private String currentToken; // session token for this handler
 
-    private final UserDAO    userDAO    = new UserDAO();
-    private final ProjectDAO projectDAO = new ProjectDAO();
-    private final TaskDAO    taskDAO    = new TaskDAO();
-    private final StatusDAO  statusDAO  = new StatusDAO();
-    private final LabelDAO   labelDAO   = new LabelDAO();
-    private final CommentDAO commentDAO = new CommentDAO();
+    private final UserDAO       userDAO       = new UserDAO();
+    private final ProjectDAO    projectDAO    = new ProjectDAO();
+    private final TaskDAO       taskDAO       = new TaskDAO();
+    private final StatusDAO     statusDAO     = new StatusDAO();
+    private final LabelDAO      labelDAO      = new LabelDAO();
+    private final CommentDAO    commentDAO    = new CommentDAO();
+    private final SprintDAO     sprintDAO     = new SprintDAO();
+    private final AttachmentDAO attachmentDAO = new AttachmentDAO();
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -102,6 +104,11 @@ public class ClientHandler implements Runnable {
                 case "ADD_PROJECT_MEMBER"   -> handleAddProjectMember(req);
                 case "ARCHIVE_PROJECT"      -> handleArchiveProject(req);
                 case "REMOVE_PROJECT_MEMBER"-> handleRemoveProjectMember(req);
+                case "GET_ACTIVE_SPRINT"    -> handleGetActiveSprint(req);
+                case "ADD_ATTACHMENT"       -> handleAddAttachment(req);
+                case "GET_ATTACHMENTS"      -> handleGetAttachments(req);
+                case "GET_ATTACHMENT_FILE"  -> handleGetAttachmentFile(req);
+                case "DELETE_ATTACHMENT"    -> handleDeleteAttachment(req);
                 default -> Response.fail(req.getRequestId(), "Unknown action: " + action);
             };
         } catch (Exception e) {
@@ -400,6 +407,49 @@ public class ClientHandler implements Runnable {
         boolean ok = projectDAO.removeProjectMember(ids[0], ids[1]);
         return ok ? Response.ok(req.getRequestId(), null)
                   : Response.fail(req.getRequestId(), "cannot_remove");
+    }
+
+    // ── sprint ────────────────────────────────────────────────────────────────
+
+    private Response handleGetActiveSprint(Request req) throws Exception {
+        requireAuth(req);
+        int projectId = (Integer) req.getPayload();
+        Sprint sprint = sprintDAO.getActiveSprint(projectId);
+        return Response.ok(req.getRequestId(), sprint);
+    }
+
+    // ── attachments ───────────────────────────────────────────────────────────
+
+    private Response handleAddAttachment(Request req) throws Exception {
+        User u = requireAuth(req);
+        Attachment a = (Attachment) req.getPayload();
+        Attachment saved = attachmentDAO.addAttachment(
+                a.getTaskId(), u.getUserId(), a.getFilename(),
+                a.getMimeType(), a.getFileSize(), a.getFileData());
+        return Response.ok(req.getRequestId(), saved);
+    }
+
+    private Response handleGetAttachments(Request req) throws Exception {
+        requireAuth(req);
+        int taskId = (Integer) req.getPayload();
+        List<Attachment> list = attachmentDAO.getAttachmentsByTask(taskId);
+        return Response.ok(req.getRequestId(), (java.io.Serializable) list);
+    }
+
+    private Response handleGetAttachmentFile(Request req) throws Exception {
+        requireAuth(req);
+        int id = (Integer) req.getPayload();
+        Attachment a = attachmentDAO.getAttachmentFile(id);
+        return a != null ? Response.ok(req.getRequestId(), a)
+                         : Response.fail(req.getRequestId(), "not_found");
+    }
+
+    private Response handleDeleteAttachment(Request req) throws Exception {
+        User u = requireAuth(req);
+        int id = (Integer) req.getPayload();
+        boolean ok = attachmentDAO.deleteAttachment(id, u.getUserId());
+        return ok ? Response.ok(req.getRequestId(), null)
+                  : Response.fail(req.getRequestId(), "not_found_or_no_permission");
     }
 
     // ── I/O helper ────────────────────────────────────────────────────────────

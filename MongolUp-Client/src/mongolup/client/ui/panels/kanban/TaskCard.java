@@ -83,8 +83,25 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             check.setFocusPainted(false);
             check.setMargin(new Insets(0, 0, 0, 0));
             check.addActionListener(e -> {
-                if (!task.isDone() && onMarkDone != null) onMarkDone.run();
-                else check.setSelected(true); // can't uncheck here
+                if (!task.isDone() && onMarkDone != null) {
+                    check.setEnabled(false);
+                    Color origBg = getBackground();
+                    javax.swing.Timer flash = new javax.swing.Timer(90, null);
+                    int[] tick = {0};
+                    flash.addActionListener(fe -> {
+                        tick[0]++;
+                        setBackground(tick[0] % 2 == 0 ? origBg : new Color(0xD1FAE5));
+                        repaint();
+                        if (tick[0] >= 4) {
+                            flash.stop();
+                            setBackground(origBg);
+                            onMarkDone.run();
+                        }
+                    });
+                    flash.start();
+                } else {
+                    check.setSelected(true); // already done; use drag to move back
+                }
             });
             titleRow.add(check);
         }
@@ -152,7 +169,12 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
         addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) { currentBorder = HOVER_BDR; repaint(); }
             @Override public void mouseExited (MouseEvent e) { currentBorder = BORDER;    repaint(); }
-            @Override public void mouseClicked(MouseEvent e) { if (onClick != null) onClick.run(); }
+            @Override public void mouseClicked(MouseEvent e) {
+                // Don't open dialog when the click landed on the checkbox
+                Component src = SwingUtilities.getDeepestComponentAt(TaskCard.this, e.getX(), e.getY());
+                if (src instanceof JCheckBox) return;
+                if (onClick != null) onClick.run();
+            }
         });
     }
 

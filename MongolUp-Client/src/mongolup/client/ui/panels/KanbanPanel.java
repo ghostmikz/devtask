@@ -123,7 +123,7 @@ public class KanbanPanel extends JPanel {
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dlg = new JDialog(owner, I18n.t("task.new.title"),
                 Dialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(460, 560);
+        dlg.setSize(460, 660);
         dlg.setLocationRelativeTo(owner);
         dlg.setResizable(false);
 
@@ -157,9 +157,11 @@ public class KanbanPanel extends JPanel {
         descField.setLineWrap(true); descField.setWrapStyleWord(true);
         descField.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         descField.setBackground(new Color(0xFAFAF8));
+        descField.setBorder(new EmptyBorder(8, 10, 8, 10));
         JScrollPane descScroll = new JScrollPane(descField);
         descScroll.setBorder(BorderFactory.createLineBorder(new Color(0xE8E8E5)));
-        descScroll.setPreferredSize(new Dimension(0, 72));
+        descScroll.getViewport().setBackground(new Color(0xFAFAF8));
+        descScroll.setPreferredSize(new Dimension(0, 80));
 
         String[] priorities = {I18n.t("priority.low"), I18n.t("priority.medium"),
                                I18n.t("priority.high"), I18n.t("priority.urgent")};
@@ -214,6 +216,57 @@ public class KanbanPanel extends JPanel {
         gc.gridy = 10; form.add(weightSpinner, gc);
         gc.gridy = 11; form.add(inputLabel(I18n.t("kanban.column")), gc);
         gc.gridy = 12; form.add(colBox, gc);
+
+        // Attachment section
+        final java.util.List<Attachment> pendingAttachments = new java.util.ArrayList<>();
+        JPanel attachChips = new JPanel();
+        attachChips.setLayout(new BoxLayout(attachChips, BoxLayout.Y_AXIS));
+        attachChips.setOpaque(false);
+
+        JLabel chooseFile = new JLabel(I18n.t("task.add_attachment"));
+        chooseFile.setForeground(new Color(0x888780));
+        chooseFile.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        chooseFile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        chooseFile.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override public void mouseEntered(java.awt.event.MouseEvent e) { chooseFile.setForeground(new Color(0x1A1A18)); }
+            @Override public void mouseExited (java.awt.event.MouseEvent e) { chooseFile.setForeground(new Color(0x888780)); }
+            @Override public void mouseClicked(java.awt.event.MouseEvent e) {
+                javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+                if (fc.showOpenDialog(dlg) != javax.swing.JFileChooser.APPROVE_OPTION) return;
+                java.io.File f = fc.getSelectedFile();
+                if (f.length() > 5L * 1024 * 1024) {
+                    JOptionPane.showMessageDialog(dlg, I18n.t("attachment.max_size")); return;
+                }
+                try {
+                    byte[] data = java.nio.file.Files.readAllBytes(f.toPath());
+                    Attachment a = new Attachment();
+                    a.setFilename(f.getName());
+                    String mime = java.net.URLConnection.guessContentTypeFromName(f.getName());
+                    a.setMimeType(mime != null ? mime : "application/octet-stream");
+                    a.setFileSize((int) f.length());
+                    a.setFileData(data);
+                    pendingAttachments.add(a);
+                    JLabel chip = new JLabel("📎 " + f.getName() + "  (" + a.getFileSizeDisplay() + ")");
+                    chip.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                    chip.setForeground(new Color(0x1A1A18));
+                    attachChips.add(chip);
+                    attachChips.revalidate(); attachChips.repaint();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(dlg, "Error reading file: " + ex.getMessage());
+                }
+            }
+        });
+
+        JPanel attachPanel = new JPanel(new BorderLayout(0, 4));
+        attachPanel.setBackground(new Color(0xFAFAF8));
+        attachPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xE8E8E5)),
+                new EmptyBorder(8, 10, 8, 10)));
+        attachPanel.add(attachChips,  BorderLayout.CENTER);
+        attachPanel.add(chooseFile,   BorderLayout.SOUTH);
+
+        gc.gridy = 13; form.add(inputLabel(I18n.t("task.attachments")), gc);
+        gc.gridy = 14; form.add(attachPanel, gc);
         root.add(form, BorderLayout.CENTER);
 
         // Buttons
@@ -254,6 +307,18 @@ public class KanbanPanel extends JPanel {
                         if (created != null) {
                             addTaskToColumn(created);
                             ToastManager.success(I18n.t("toast.task_created"));
+                            if (!pendingAttachments.isEmpty()) {
+                                final int newTaskId = created.getTaskId();
+                                new SwingWorker<Void, Void>() {
+                                    @Override protected Void doInBackground() throws Exception {
+                                        for (Attachment a : pendingAttachments) {
+                                            a.setTaskId(newTaskId);
+                                            ServerConnection.getInstance().send("ADD_ATTACHMENT", a);
+                                        }
+                                        return null;
+                                    }
+                                }.execute();
+                            }
                         }
                     } catch (Exception ignored) {}
                 }

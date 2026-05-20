@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class SidebarPanel extends JPanel {
 
@@ -231,12 +232,78 @@ public class SidebarPanel extends JPanel {
     private void addTeamSection() {
         addSection(I18n.t("nav.team"));
         if (teamMembers.isEmpty()) {
-            // Fallback: at least show current user while members load
             User me = AppContext.getInstance().getCurrentUser();
             if (me != null) addMember(me);
         } else {
             for (User u : teamMembers) addMember(u);
         }
+        // "+ Add Member" link
+        JPanel addRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 2));
+        addRow.setBackground(BG);
+        addRow.setMaximumSize(new Dimension(220, 26));
+        addRow.setAlignmentX(LEFT_ALIGNMENT);
+        JLabel addLbl = new JLabel("+ " + I18n.t("nav.add_member"));
+        addLbl.setForeground(TEXT_DIM);
+        addLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        addLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        addLbl.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override public void mouseEntered(java.awt.event.MouseEvent e) { addLbl.setForeground(TEXT_FULL); }
+            @Override public void mouseExited (java.awt.event.MouseEvent e) { addLbl.setForeground(TEXT_DIM);  }
+            @Override public void mouseClicked(java.awt.event.MouseEvent e) { showAddMemberDialog(); }
+        });
+        addRow.add(addLbl);
+        add(addRow);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void showAddMemberDialog() {
+        Project p = AppContext.getInstance().getCurrentProject();
+        if (p == null) return;
+        new javax.swing.SwingWorker<List<User>, Void>() {
+            @Override protected List<User> doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("GET_ALL_USERS", null);
+                return r.isSuccess() ? (List<User>) r.getData() : List.of();
+            }
+            @Override protected void done() {
+                try {
+                    List<User> all = get();
+                    List<User> candidates = all.stream()
+                            .filter(u -> teamMembers.stream()
+                                    .noneMatch(m -> m.getUserId() == u.getUserId()))
+                            .collect(Collectors.toList());
+                    if (candidates.isEmpty()) {
+                        JOptionPane.showMessageDialog(SidebarPanel.this,
+                                "All users are already members of this project.");
+                        return;
+                    }
+                    String[] labels = candidates.stream()
+                            .map(u -> (u.getFullName() != null && !u.getFullName().isBlank()
+                                    ? u.getFullName() : u.getUsername())
+                                    + " (@" + u.getUsername() + ")")
+                            .toArray(String[]::new);
+                    String chosen = (String) JOptionPane.showInputDialog(
+                            SidebarPanel.this,
+                            I18n.t("projects.add_member") + ":",
+                            I18n.t("projects.add_member"),
+                            JOptionPane.PLAIN_MESSAGE, null, labels, labels[0]);
+                    if (chosen == null) return;
+                    for (int i = 0; i < labels.length; i++) {
+                        if (labels[i].equals(chosen)) {
+                            final int uid = candidates.get(i).getUserId();
+                            new javax.swing.SwingWorker<Void, Void>() {
+                                @Override protected Void doInBackground() throws Exception {
+                                    ServerConnection.getInstance().send(
+                                            "ADD_PROJECT_MEMBER", new int[]{p.getProjectId(), uid});
+                                    return null;
+                                }
+                                @Override protected void done() { loadTeamMembers(); }
+                            }.execute();
+                            break;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }.execute();
     }
 
     /** Fetches project members from the server and rebuilds the sidebar. */

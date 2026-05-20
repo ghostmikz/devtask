@@ -4,6 +4,7 @@ import mongolup.client.AppContext;
 import mongolup.client.ServerConnection;
 import mongolup.client.i18n.I18n;
 import mongolup.client.ui.components.ToastManager;
+import mongolup.server.model.Attachment;
 import mongolup.server.model.Comment;
 import mongolup.server.model.Label;
 import mongolup.server.model.Task;
@@ -16,6 +17,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -44,6 +48,7 @@ public class TaskDetailDialog extends JDialog {
     // sections
     private JPanel assigneesPanel;
     private JPanel labelsPanel;
+    private JPanel attachmentsPanel;
     private JPanel commentsPanel;
     private JTextField commentInput;
 
@@ -86,12 +91,14 @@ public class TaskDetailDialog extends JDialog {
             descArea = new JTextArea(task.getDescription() != null ? task.getDescription() : "", 4, 0);
             descArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             descArea.setBackground(INPUT_BG);
-            descArea.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER),
-                    new EmptyBorder(8, 10, 8, 10)));
+            descArea.setBorder(new EmptyBorder(8, 10, 8, 10));
             descArea.setLineWrap(true);
             descArea.setWrapStyleWord(true);
-            p.add(new JScrollPane(descArea), BorderLayout.CENTER);
+            JScrollPane descScroll = new JScrollPane(descArea);
+            descScroll.setBorder(BorderFactory.createLineBorder(BORDER));
+            descScroll.getViewport().setBackground(INPUT_BG);
+            descScroll.setPreferredSize(new Dimension(0, 100));
+            p.add(descScroll, BorderLayout.CENTER);
             return p;
         }));
         content.add(Box.createVerticalStrut(10));
@@ -142,6 +149,19 @@ public class TaskDetailDialog extends JDialog {
             labelsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             labelsPanel.setBackground(CARD);
             p.add(labelsPanel, BorderLayout.CENTER);
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(10));
+
+        // ── Attachments ──────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new BorderLayout(0, 8));
+            p.setBackground(CARD);
+            p.add(fieldLabel(I18n.t("task.attachments")), BorderLayout.NORTH);
+            attachmentsPanel = new JPanel();
+            attachmentsPanel.setBackground(CARD);
+            attachmentsPanel.setLayout(new BoxLayout(attachmentsPanel, BoxLayout.Y_AXIS));
+            p.add(attachmentsPanel, BorderLayout.CENTER);
             return p;
         }));
         content.add(Box.createVerticalStrut(10));
@@ -236,6 +256,7 @@ public class TaskDetailDialog extends JDialog {
                     if (detail != null) {
                         populateAssignees(detail.getAssignees());
                         populateLabels(detail.getLabels());
+                        populateAttachments(detail.getAttachments());
                         populateComments(detail.getComments());
                     }
                 } catch (Exception ignored) {}
@@ -264,6 +285,122 @@ public class TaskDetailDialog extends JDialog {
         assigneesPanel.add(addUser);
         assigneesPanel.revalidate();
         assigneesPanel.repaint();
+    }
+
+    private void populateAttachments(List<Attachment> attachments) {
+        attachmentsPanel.removeAll();
+        if (attachments != null) {
+            for (Attachment a : attachments) {
+                JPanel chip = new JPanel(new BorderLayout(6, 0));
+                chip.setBackground(new Color(0xF0F0EE));
+                chip.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(BORDER),
+                        new EmptyBorder(4, 8, 4, 8)));
+                chip.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+                chip.setAlignmentX(LEFT_ALIGNMENT);
+                JLabel nameLbl = new JLabel("📎 " + a.getFilename()
+                        + "  (" + a.getFileSizeDisplay() + ")");
+                nameLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                nameLbl.setForeground(TEXT_PRI);
+                nameLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                nameLbl.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) { downloadAttachment(a); }
+                });
+                JLabel del = new JLabel(" ✕");
+                del.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                del.setForeground(TEXT_SEC);
+                del.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                del.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) {
+                        new SwingWorker<Boolean, Void>() {
+                            @Override protected Boolean doInBackground() throws Exception {
+                                var r = ServerConnection.getInstance()
+                                        .send("DELETE_ATTACHMENT", a.getAttachmentId());
+                                return r.isSuccess();
+                            }
+                            @Override protected void done() {
+                                try { if (get()) loadDetail(); } catch (Exception ignored) {}
+                            }
+                        }.execute();
+                    }
+                });
+                chip.add(nameLbl, BorderLayout.CENTER);
+                chip.add(del,     BorderLayout.EAST);
+                attachmentsPanel.add(chip);
+                attachmentsPanel.add(Box.createVerticalStrut(4));
+            }
+        }
+        // Add-file link
+        JLabel addFile = new JLabel(I18n.t("task.add_attachment"));
+        addFile.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        addFile.setForeground(TEXT_SEC);
+        addFile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        addFile.setAlignmentX(LEFT_ALIGNMENT);
+        addFile.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { addFile.setForeground(ACCENT); }
+            @Override public void mouseExited (MouseEvent e) { addFile.setForeground(TEXT_SEC); }
+            @Override public void mouseClicked(MouseEvent e) { uploadAttachment(); }
+        });
+        attachmentsPanel.add(addFile);
+        attachmentsPanel.revalidate();
+        attachmentsPanel.repaint();
+    }
+
+    private void uploadAttachment() {
+        JFileChooser fc = new JFileChooser();
+        if (fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        File f = fc.getSelectedFile();
+        if (f.length() > 5L * 1024 * 1024) {
+            JOptionPane.showMessageDialog(this, I18n.t("attachment.max_size")); return;
+        }
+        try {
+            byte[] data = Files.readAllBytes(f.toPath());
+            Attachment a = new Attachment();
+            a.setTaskId(task.getTaskId());
+            a.setFilename(f.getName());
+            String mime = java.net.URLConnection.guessContentTypeFromName(f.getName());
+            a.setMimeType(mime != null ? mime : "application/octet-stream");
+            a.setFileSize((int) f.length());
+            a.setFileData(data);
+            new SwingWorker<Attachment, Void>() {
+                @Override protected Attachment doInBackground() throws Exception {
+                    var r = ServerConnection.getInstance().send("ADD_ATTACHMENT", a);
+                    return r.isSuccess() ? (Attachment) r.getData() : null;
+                }
+                @Override protected void done() {
+                    try {
+                        if (get() != null) {
+                            ToastManager.success(I18n.t("toast.attachment_added"));
+                            loadDetail();
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }.execute();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error reading file: " + ex.getMessage());
+        }
+    }
+
+    private void downloadAttachment(Attachment meta) {
+        new SwingWorker<Attachment, Void>() {
+            @Override protected Attachment doInBackground() throws Exception {
+                var r = ServerConnection.getInstance()
+                        .send("GET_ATTACHMENT_FILE", meta.getAttachmentId());
+                return r.isSuccess() ? (Attachment) r.getData() : null;
+            }
+            @Override protected void done() {
+                try {
+                    Attachment full = get();
+                    if (full == null || full.getFileData() == null) return;
+                    File tmp = File.createTempFile("devtask_", "_" + full.getFilename());
+                    tmp.deleteOnExit();
+                    try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                        fos.write(full.getFileData());
+                    }
+                    if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(tmp);
+                } catch (Exception ignored) {}
+            }
+        }.execute();
     }
 
     private void populateLabels(List<Label> labels) {

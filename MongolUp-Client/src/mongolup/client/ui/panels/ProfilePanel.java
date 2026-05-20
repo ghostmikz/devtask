@@ -104,7 +104,7 @@ public class ProfilePanel extends JPanel {
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(24, 24, 24, 24)));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 280));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 340));
 
         User u = AppContext.getInstance().getCurrentUser();
         String initials = u != null ? u.getInitials() : "?";
@@ -128,24 +128,30 @@ public class ProfilePanel extends JPanel {
         card.add(Box.createVerticalStrut(18));
 
         // Stats
-        JPanel stats = new JPanel(new GridLayout(1, 3, 8, 0));
+        JPanel stats = new JPanel(new GridLayout(1, 3, 12, 0));
         stats.setBackground(CARD);
-        stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
         stats.setAlignmentX(CENTER_ALIGNMENT);
         stats.add(statCell("17", I18n.t("profile.stats.points")));
         stats.add(statCell("5",  I18n.t("profile.stats.tasks")));
         stats.add(statCell("3",  I18n.t("profile.stats.sprints")));
         card.add(stats);
-        card.add(Box.createVerticalStrut(18));
+        card.add(Box.createRigidArea(new Dimension(0, 14)));
 
         // Buttons
-        JPanel btns = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         btns.setBackground(CARD);
-        btns.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        btns.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
         btns.setAlignmentX(CENTER_ALIGNMENT);
         JButton edit = primaryBtn(I18n.t("profile.edit"));
+        edit.setPreferredSize(new Dimension(110, 36));
         edit.addActionListener(e -> startEdit());
         JButton logout = secondaryBtn(I18n.t("profile.logout"));
+        logout.setPreferredSize(new Dimension(110, 36));
+        logout.setForeground(new Color(0xA32D2D));
+        logout.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xFCA5A5)),
+                new EmptyBorder(7, 13, 7, 13)));
         logout.addActionListener(e -> doLogout());
         btns.add(edit);
         btns.add(logout);
@@ -308,17 +314,21 @@ public class ProfilePanel extends JPanel {
 
     private JPanel statCell(String val, String label) {
         JPanel p = new JPanel();
-        p.setBackground(BG);
+        p.setBackground(CARD);
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBorder(new EmptyBorder(10, 8, 10, 8));
+        p.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(10, 8, 10, 8)));
+        p.setPreferredSize(new Dimension(70, 90));
         JLabel v = new JLabel(val, SwingConstants.CENTER);
-        v.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        v.setFont(new Font("Segoe UI", Font.BOLD, 22));
         v.setForeground(TEXT);
         v.setAlignmentX(CENTER_ALIGNMENT);
         JLabel l = new JLabel(label, SwingConstants.CENTER);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         l.setForeground(SEC);
         l.setAlignmentX(CENTER_ALIGNMENT);
+        l.setBorder(new EmptyBorder(4, 0, 0, 0));
         p.add(v);
         p.add(l);
         return p;
