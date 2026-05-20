@@ -447,7 +447,11 @@ BEGIN
                     ORDER BY u.full_name SEPARATOR '|')
             FROM task_assignments ta
             JOIN users u ON u.user_id = ta.user_id
-            WHERE ta.task_id = t.task_id) AS assignees_csv
+            WHERE ta.task_id = t.task_id) AS assignees_csv,
+           (SELECT GROUP_CONCAT(CONCAT(l.name, ':', l.color) ORDER BY l.name SEPARATOR '|')
+            FROM task_labels tl
+            JOIN labels l ON l.label_id = tl.label_id
+            WHERE tl.task_id = t.task_id) AS labels_csv
     FROM tasks t
     LEFT JOIN statuses s ON s.status_id = t.status_id
     WHERE t.project_id = p_project_id

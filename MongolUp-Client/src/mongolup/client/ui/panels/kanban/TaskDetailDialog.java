@@ -501,18 +501,17 @@ public class TaskDetailDialog extends JDialog {
         if (hasAny) {
             for (Label l : labels) {
                 Color bg = parseHex(l.getColor(), new Color(0xE8E8E5));
-                Color fg = darken(bg);
 
-                // chip = tag + "✕" remove button
+                // chip = tag + "✕" remove button — always white text on colored bg
                 JPanel chip = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
                 chip.setBackground(bg);
                 chip.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 4));
                 JLabel tag = new JLabel(l.getName());
                 tag.setFont(new Font("Arial", Font.BOLD, 11));
-                tag.setForeground(fg);
+                tag.setForeground(Color.WHITE);
                 JLabel rm = new JLabel("✕");
                 rm.setFont(new Font("Arial", Font.PLAIN, 10));
-                rm.setForeground(fg);
+                rm.setForeground(Color.WHITE);
                 rm.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 rm.addMouseListener(new MouseAdapter() {
                     @Override public void mouseClicked(MouseEvent e) {

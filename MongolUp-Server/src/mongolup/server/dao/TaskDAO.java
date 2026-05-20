@@ -218,5 +218,6 @@ public class TaskDAO {
         try { t.setStatusColor(rs.getString("status_color"));   } catch (SQLException ignored) {}
         try { t.setStatusType(rs.getString("status_type"));     } catch (SQLException ignored) {}
         try { t.setAssigneesCsv(rs.getString("assignees_csv")); } catch (SQLException ignored) {}
+        try { t.setLabelsCsv(rs.getString("labels_csv"));       } catch (SQLException ignored) {}
     }
 }

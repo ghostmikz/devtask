@@ -106,6 +106,38 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             add(Box.createVerticalStrut(8));
         }
 
+        // Label chips (white text on colored bg)
+        String lcsv = task.getLabelsCsv();
+        if (lcsv != null && !lcsv.isBlank()) {
+            JPanel labelRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            labelRow.setOpaque(false);
+            labelRow.setAlignmentX(LEFT_ALIGNMENT);
+            for (String entry : lcsv.split("\\|")) {
+                String[] kv = entry.split(":", 2);
+                if (kv.length < 2) continue;
+                String lname = kv[0];
+                Color  lbg   = parseHex(kv[1], new Color(0xE8E8E5));
+                // inline chip — rounded pill painted manually
+                JLabel chip = new JLabel(lname) {
+                    @Override protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(lbg);
+                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                        g2.dispose();
+                        super.paintComponent(g);
+                    }
+                };
+                chip.setFont(new Font("Arial", Font.BOLD, 10));
+                chip.setForeground(Color.WHITE);
+                chip.setBorder(new EmptyBorder(2, 7, 2, 7));
+                chip.setOpaque(false);
+                labelRow.add(chip);
+            }
+            add(labelRow);
+            add(Box.createVerticalStrut(6));
+        }
+
         // Assignee avatars
         String csv = task.getAssigneesCsv();
         if (csv != null && !csv.isBlank()) {
