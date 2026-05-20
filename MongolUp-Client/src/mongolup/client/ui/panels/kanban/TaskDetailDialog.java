@@ -39,11 +39,12 @@ public class TaskDetailDialog extends JDialog {
     private TaskDetail detail;
 
     // edit fields
-    private JTextField titleField;
-    private JTextArea  descArea;
+    private JTextField        titleField;
+    private JTextArea         descArea;
     private JComboBox<String> priorityBox;
-    private JTextField dueDateField;
-    private JTextField weightField;
+    private JSpinner          dueDateSpinner;
+    private JCheckBox         noDueDateBox;
+    private JTextField        weightField;
 
     // sections
     private JPanel assigneesPanel;
@@ -115,15 +116,35 @@ public class TaskDetailDialog extends JDialog {
             priorityBox.setSelectedIndex(Math.max(0, task.getPriority() - 1));
             priorityBox.setBackground(INPUT_BG);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            dueDateField = new JTextField(task.getDueDate() != null ? sdf.format(task.getDueDate()) : "");
-            styleInput(dueDateField);
+            // Date+time spinner — defaults to today when task has no due date
+            SpinnerDateModel dateModel = new SpinnerDateModel();
+            dateModel.setValue(task.getDueDate() != null ? task.getDueDate() : new java.util.Date());
+            dueDateSpinner = new JSpinner(dateModel);
+            JSpinner.DateEditor dateEd = new JSpinner.DateEditor(dueDateSpinner, "yyyy-MM-dd HH:mm");
+            dueDateSpinner.setEditor(dateEd);
+            dateEd.getTextField().setBackground(INPUT_BG);
+            dateEd.getTextField().setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER),
+                    new EmptyBorder(5, 8, 5, 8)));
+            dueDateSpinner.setBorder(null);
+
+            // "No due date" checkbox stacked below spinner — wrapped so grid heights stay sane
+            noDueDateBox = new JCheckBox(I18n.t("task.no_due_date"), task.getDueDate() == null);
+            noDueDateBox.setBackground(CARD);
+            noDueDateBox.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            noDueDateBox.addActionListener(e -> dueDateSpinner.setEnabled(!noDueDateBox.isSelected()));
+            dueDateSpinner.setEnabled(!noDueDateBox.isSelected());
+
+            JPanel dateCell = new JPanel(new BorderLayout(0, 2));
+            dateCell.setBackground(CARD);
+            dateCell.add(dueDateSpinner, BorderLayout.CENTER);
+            dateCell.add(noDueDateBox,   BorderLayout.SOUTH);
 
             weightField = new JTextField(String.valueOf(task.getWeight()));
             styleInput(weightField);
 
             p.add(fieldGroupSmall(I18n.t("task.priority"), priorityBox));
-            p.add(fieldGroupSmall(I18n.t("task.due_date"), dueDateField));
+            p.add(fieldGroupSmall(I18n.t("task.due_date"), dateCell));
             p.add(fieldGroupSmall(I18n.t("task.points"),   weightField));
             return p;
         }));
@@ -482,6 +503,11 @@ public class TaskDetailDialog extends JDialog {
         task.setPriority(priorityBox.getSelectedIndex() + 1);
         try { task.setWeight(Integer.parseInt(weightField.getText().trim())); }
         catch (NumberFormatException ignored) {}
+        if (noDueDateBox != null && noDueDateBox.isSelected()) {
+            task.setDueDate(null);
+        } else if (dueDateSpinner != null) {
+            task.setDueDate((java.util.Date) ((SpinnerDateModel) dueDateSpinner.getModel()).getValue());
+        }
 
         new SwingWorker<Void, Void>() {
             @Override protected Void doInBackground() throws Exception {

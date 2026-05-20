@@ -43,6 +43,7 @@ public class SidebarPanel extends JPanel {
     private JPanel                 projectListPanel;
     private String                 activeNav       = "";
     private List<User>             teamMembers     = new ArrayList<>();
+    private List<Project>          currentProjects = new ArrayList<>();
 
     public SidebarPanel(Consumer<String> pageCallback) {
         this.pageCallback = pageCallback;
@@ -88,6 +89,10 @@ public class SidebarPanel extends JPanel {
         projectListPanel.setBackground(BG);
         projectListPanel.setAlignmentX(LEFT_ALIGNMENT);
         projectListPanel.setLayout(new BoxLayout(projectListPanel, BoxLayout.Y_AXIS));
+        // Re-populate from cached list (survives rebuild() calls)
+        for (Project p : currentProjects) {
+            projectListPanel.add(buildProjectItem(p));
+        }
         add(projectListPanel);
 
         add(Box.createVerticalGlue());
@@ -107,6 +112,7 @@ public class SidebarPanel extends JPanel {
 
 
     public void setProjects(List<Project> projects) {
+        currentProjects = new ArrayList<>(projects);   // cache so rebuild() can repopulate
         projItems.clear();
         projectListPanel.removeAll();
         for (Project p : projects) {

@@ -123,7 +123,7 @@ public class KanbanPanel extends JPanel {
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dlg = new JDialog(owner, I18n.t("task.new.title"),
                 Dialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(460, 660);
+        dlg.setSize(460, 560);
         dlg.setLocationRelativeTo(owner);
         dlg.setResizable(false);
 
@@ -178,10 +178,14 @@ public class KanbanPanel extends JPanel {
 
         SpinnerDateModel dateModel = new SpinnerDateModel();
         JSpinner dueDateSpinner = new JSpinner(dateModel);
-        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dueDateSpinner, "yyyy-MM-dd");
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dueDateSpinner, "yyyy-MM-dd HH:mm");
         dueDateSpinner.setEditor(dateEditor);
+        dateEditor.getTextField().setBackground(new Color(0xFAFAF8));
+        dateEditor.getTextField().setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xE8E8E5)),
+                new EmptyBorder(6, 8, 6, 8)));
+        dueDateSpinner.setBorder(null);
         dueDateSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        dueDateSpinner.setBackground(new Color(0xFAFAF8));
         // "No due date" checkbox
         JCheckBox noDueDate = new JCheckBox(I18n.t("task.no_due_date"), true);
         noDueDate.setBackground(Color.WHITE);
@@ -267,7 +271,13 @@ public class KanbanPanel extends JPanel {
 
         gc.gridy = 13; form.add(inputLabel(I18n.t("task.attachments")), gc);
         gc.gridy = 14; form.add(attachPanel, gc);
-        root.add(form, BorderLayout.CENTER);
+
+        // Wrap form in a scroll pane so it stays compact even with many fields
+        JScrollPane formScroll = new JScrollPane(form);
+        formScroll.setBorder(null);
+        formScroll.getVerticalScrollBar().setUnitIncrement(12);
+        formScroll.getViewport().setBackground(Color.WHITE);
+        root.add(formScroll, BorderLayout.CENTER);
 
         // Buttons
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));

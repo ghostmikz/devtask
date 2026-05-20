@@ -34,20 +34,24 @@ public class TaskDAO {
     }
 
     public TaskDetail getTaskDetail(int taskId) throws SQLException {
+        TaskDetail td = null;
         try (Connection c = DatabaseConnection.getConnection();
              CallableStatement cs = c.prepareCall("{CALL sp_get_task_detail(?)}")) {
             cs.setInt(1, taskId);
+            // Close the ResultSet BEFORE opening a second statement on the same connection.
+            // MySQL Connector/J can throw if a second statement is issued while an RS is open.
             try (ResultSet rs = cs.executeQuery()) {
                 if (!rs.next()) return null;
-                TaskDetail td = new TaskDetail();
+                td = new TaskDetail();
                 copyTaskFields(rs, td);
-                td.setAssignees(getAssignees(c, taskId));
-                td.setLabels(new LabelDAO().getLabelsByTask(taskId));
-                td.setComments(new CommentDAO().getCommentsByTask(taskId));
-                td.setAttachments(new AttachmentDAO().getAttachmentsByTask(taskId));
-                return td;
-            }
+            } // rs closed here — safe to reuse connection
+            td.setAssignees(getAssignees(c, taskId));
         }
+        // Other DAOs open their own connections; order doesn't matter
+        td.setLabels(new LabelDAO().getLabelsByTask(taskId));
+        td.setComments(new CommentDAO().getCommentsByTask(taskId));
+        td.setAttachments(new AttachmentDAO().getAttachmentsByTask(taskId));
+        return td;
     }
 
     public Task createTask(Task task) throws SQLException {
