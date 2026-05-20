@@ -56,7 +56,7 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
         setBackground(task.isDone() ? new Color(0xFAFAF8) : CARD_BG);
         setBorder(new EmptyBorder(11, 12, 11, 12));
         setOpaque(false);
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         buildContent();
         setupDnd();
@@ -84,38 +84,37 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             JPanel statusRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
             statusRow.setOpaque(false);
             statusRow.setAlignmentX(LEFT_ALIGNMENT);
+            statusRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
             Color tagBg = parseHex(task.getStatusColor(), new Color(0xE8E8E5));
             statusRow.add(new TagLabel(task.getStatusName(), tagBg, TEXT_PRI));
             add(statusRow);
-            add(Box.createVerticalStrut(6));
+            add(Box.createVerticalStrut(5));
         }
 
         // ── 2. Title ──────────────────────────────────────────────────────────
-        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        titleRow.setOpaque(false);
-        titleRow.setAlignmentX(LEFT_ALIGNMENT);
         String titleHtml = task.isDone()
                 ? "<html><body style='width:160px'><s>" + escapeHtml(task.getTitle()) + "</s></body></html>"
                 : "<html><body style='width:160px'>"    + escapeHtml(task.getTitle()) + "</body></html>";
         JLabel title = new JLabel(titleHtml);
         title.setFont(new Font("Arial", Font.PLAIN, 12));
         title.setForeground(task.isDone() ? TEXT_SEC : TEXT_PRI);
-        titleRow.add(title);
-        add(titleRow);
-        add(Box.createVerticalStrut(8));
+        title.setAlignmentX(LEFT_ALIGNMENT);
+        title.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48)); // cap at ~3 lines
+        add(title);
+        add(Box.createVerticalStrut(7));
 
         // ── 3. Labels + Assignees on ONE row ──────────────────────────────────
         boolean hasLabels    = task.getLabelsCsv() != null && !task.getLabelsCsv().isBlank();
         boolean hasAssignees = task.getAssigneesCsv() != null && !task.getAssigneesCsv().isBlank();
 
         if (hasLabels || hasAssignees) {
-            JPanel midRow = new JPanel(new BorderLayout(6, 0));
+            JPanel midRow = new JPanel(new BorderLayout(4, 0));
             midRow.setOpaque(false);
             midRow.setAlignmentX(LEFT_ALIGNMENT);
+            midRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
 
-            // labels on left
             if (hasLabels) {
-                JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+                JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
                 labelPanel.setOpaque(false);
                 for (String entry : task.getLabelsCsv().split("\\|")) {
                     String[] kv = entry.split(":", 2);
@@ -141,7 +140,6 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
                 midRow.add(labelPanel, BorderLayout.WEST);
             }
 
-            // assignee avatars on right
             if (hasAssignees) {
                 String[] parts = task.getAssigneesCsv().split("\\|");
                 JPanel avatarPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
@@ -174,6 +172,7 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
         JPanel footer = new JPanel(new BorderLayout());
         footer.setOpaque(false);
         footer.setAlignmentX(LEFT_ALIGNMENT);
+        footer.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
 
         JPanel pts = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         pts.setOpaque(false);
