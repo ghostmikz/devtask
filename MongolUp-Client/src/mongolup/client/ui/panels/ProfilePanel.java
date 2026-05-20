@@ -127,15 +127,6 @@ public class ProfilePanel extends JPanel {
         card.add(role);
         card.add(Box.createVerticalStrut(18));
 
-        // Stats
-        JPanel stats = new JPanel(new GridLayout(1, 3, 12, 0));
-        stats.setBackground(CARD);
-        stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
-        stats.setAlignmentX(CENTER_ALIGNMENT);
-        stats.add(statCell("17", I18n.t("profile.stats.points")));
-        stats.add(statCell("5",  I18n.t("profile.stats.tasks")));
-        stats.add(statCell("3",  I18n.t("profile.stats.sprints")));
-        card.add(stats);
         card.add(Box.createRigidArea(new Dimension(0, 14)));
 
         // Buttons

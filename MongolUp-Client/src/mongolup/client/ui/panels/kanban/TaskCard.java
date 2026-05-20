@@ -79,11 +79,21 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
     public Task getTask() { return task; }
 
     private void buildContent() {
-        // Title row — no checkbox (mark done by dragging to done column)
-        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        // ── 1. Status badge (TOP) ─────────────────────────────────────────────
+        if (task.getStatusName() != null) {
+            JPanel statusRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            statusRow.setOpaque(false);
+            statusRow.setAlignmentX(LEFT_ALIGNMENT);
+            Color tagBg = parseHex(task.getStatusColor(), new Color(0xE8E8E5));
+            statusRow.add(new TagLabel(task.getStatusName(), tagBg, TEXT_PRI));
+            add(statusRow);
+            add(Box.createVerticalStrut(6));
+        }
+
+        // ── 2. Title ──────────────────────────────────────────────────────────
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         titleRow.setOpaque(false);
         titleRow.setAlignmentX(LEFT_ALIGNMENT);
-
         String titleHtml = task.isDone()
                 ? "<html><body style='width:160px'><s>" + escapeHtml(task.getTitle()) + "</s></body></html>"
                 : "<html><body style='width:160px'>"    + escapeHtml(task.getTitle()) + "</body></html>";
@@ -94,97 +104,88 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
         add(titleRow);
         add(Box.createVerticalStrut(8));
 
-        // Status/label tag
-        if (task.getStatusName() != null) {
-            JPanel tags = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-            tags.setBackground(getBackground());
-            tags.setAlignmentX(LEFT_ALIGNMENT);
-            Color tagBg = parseHex(task.getStatusColor(), new Color(0xE8E8E5));
-            Color tagFg = TEXT_PRI;
-            tags.add(new TagLabel(task.getStatusName(), tagBg, tagFg));
-            add(tags);
-            add(Box.createVerticalStrut(8));
-        }
+        // ── 3. Labels + Assignees on ONE row ──────────────────────────────────
+        boolean hasLabels    = task.getLabelsCsv() != null && !task.getLabelsCsv().isBlank();
+        boolean hasAssignees = task.getAssigneesCsv() != null && !task.getAssigneesCsv().isBlank();
 
-        // Label chips (white text on colored bg)
-        String lcsv = task.getLabelsCsv();
-        if (lcsv != null && !lcsv.isBlank()) {
-            JPanel labelRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-            labelRow.setOpaque(false);
-            labelRow.setAlignmentX(LEFT_ALIGNMENT);
-            for (String entry : lcsv.split("\\|")) {
-                String[] kv = entry.split(":", 2);
-                if (kv.length < 2) continue;
-                String lname = kv[0];
-                Color  lbg   = parseHex(kv[1], new Color(0xE8E8E5));
-                // inline chip — rounded pill painted manually
-                JLabel chip = new JLabel(lname) {
-                    @Override protected void paintComponent(Graphics g) {
-                        Graphics2D g2 = (Graphics2D) g.create();
-                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                        g2.setColor(lbg);
-                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                        g2.dispose();
-                        super.paintComponent(g);
-                    }
-                };
-                chip.setFont(new Font("Arial", Font.BOLD, 10));
-                chip.setForeground(Color.WHITE);
-                chip.setBorder(new EmptyBorder(2, 7, 2, 7));
-                chip.setOpaque(false);
-                labelRow.add(chip);
-            }
-            add(labelRow);
-            add(Box.createVerticalStrut(6));
-        }
+        if (hasLabels || hasAssignees) {
+            JPanel midRow = new JPanel(new BorderLayout(6, 0));
+            midRow.setOpaque(false);
+            midRow.setAlignmentX(LEFT_ALIGNMENT);
 
-        // Assignee avatars
-        String csv = task.getAssigneesCsv();
-        if (csv != null && !csv.isBlank()) {
-            String[] parts = csv.split("\\|");
-            JPanel avatarRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
-            avatarRow.setOpaque(false);
-            avatarRow.setAlignmentX(LEFT_ALIGNMENT);
-            int shown = Math.min(parts.length, 4);
-            for (int i = 0; i < shown; i++) {
-                String[] kv = parts[i].split(":", 2);
-                int uid = 0;
-                String name = parts[i];
-                if (kv.length == 2) {
-                    try { uid = Integer.parseInt(kv[0]); } catch (NumberFormatException ignored) {}
-                    name = kv[1];
+            // labels on left
+            if (hasLabels) {
+                JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+                labelPanel.setOpaque(false);
+                for (String entry : task.getLabelsCsv().split("\\|")) {
+                    String[] kv = entry.split(":", 2);
+                    if (kv.length < 2) continue;
+                    String lname = kv[0];
+                    Color  lbg   = parseHex(kv[1], new Color(0xE8E8E5));
+                    JLabel chip = new JLabel(lname) {
+                        @Override protected void paintComponent(Graphics g) {
+                            Graphics2D g2 = (Graphics2D) g.create();
+                            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                            g2.setColor(lbg);
+                            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                            g2.dispose();
+                            super.paintComponent(g);
+                        }
+                    };
+                    chip.setFont(new Font("Arial", Font.BOLD, 10));
+                    chip.setForeground(Color.WHITE);
+                    chip.setBorder(new EmptyBorder(2, 6, 2, 6));
+                    chip.setOpaque(false);
+                    labelPanel.add(chip);
                 }
-                Color col = AVATAR_PAL[Math.abs(uid > 0 ? uid : i) % AVATAR_PAL.length];
-                avatarRow.add(new AvatarLabel(computeInitials(name), col, 20));
+                midRow.add(labelPanel, BorderLayout.WEST);
             }
-            if (parts.length > 4) {
-                JLabel more = new JLabel("+" + (parts.length - 4));
-                more.setFont(new Font("Arial", Font.PLAIN, 10));
-                more.setForeground(TEXT_SEC);
-                avatarRow.add(more);
+
+            // assignee avatars on right
+            if (hasAssignees) {
+                String[] parts = task.getAssigneesCsv().split("\\|");
+                JPanel avatarPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+                avatarPanel.setOpaque(false);
+                int shown = Math.min(parts.length, 3);
+                for (int i = 0; i < shown; i++) {
+                    String[] kv = parts[i].split(":", 2);
+                    int uid = 0; String name = parts[i];
+                    if (kv.length == 2) {
+                        try { uid = Integer.parseInt(kv[0]); } catch (NumberFormatException ignored) {}
+                        name = kv[1];
+                    }
+                    avatarPanel.add(new AvatarLabel(computeInitials(name),
+                            AVATAR_PAL[Math.abs(uid > 0 ? uid : i) % AVATAR_PAL.length], 20));
+                }
+                if (parts.length > 3) {
+                    JLabel more = new JLabel("+" + (parts.length - 3));
+                    more.setFont(new Font("Arial", Font.PLAIN, 9));
+                    more.setForeground(TEXT_SEC);
+                    avatarPanel.add(more);
+                }
+                midRow.add(avatarPanel, BorderLayout.EAST);
             }
-            add(avatarRow);
+
+            add(midRow);
             add(Box.createVerticalStrut(6));
         }
 
-        // Footer: points dot + weight
+        // ── 4. Footer: priority dot + points | due date ───────────────────────
         JPanel footer = new JPanel(new BorderLayout());
-        footer.setBackground(getBackground());
+        footer.setOpaque(false);
         footer.setAlignmentX(LEFT_ALIGNMENT);
 
         JPanel pts = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-        pts.setBackground(getBackground());
+        pts.setOpaque(false);
         JLabel dot = new JLabel("●");
         dot.setForeground(Color.decode(task.getPriorityColor()));
         dot.setFont(new Font("Arial", Font.PLAIN, 9));
         JLabel wt = new JLabel(task.getWeight() + " " + I18n.t("kanban.points"));
         wt.setFont(new Font("Arial", Font.PLAIN, 11));
         wt.setForeground(TEXT_SEC);
-        pts.add(dot);
-        pts.add(wt);
+        pts.add(dot); pts.add(wt);
         footer.add(pts, BorderLayout.WEST);
 
-        // Due date badge (right side of footer)
         if (task.getDueDate() != null) {
             boolean overdue = !task.isDone() && task.getDueDate().before(new Date());
             String dateStr = new SimpleDateFormat("MM/dd").format(task.getDueDate());

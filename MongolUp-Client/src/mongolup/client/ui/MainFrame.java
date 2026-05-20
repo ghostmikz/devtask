@@ -8,8 +8,10 @@ import mongolup.server.model.Response;
 import mongolup.server.model.Sprint;
 import mongolup.client.ui.panels.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -35,6 +37,7 @@ public class MainFrame extends JFrame {
         setSize(1200, 750);
         setMinimumSize(new Dimension(900, 600));
         setLocationRelativeTo(null);
+        loadAppIcon(this);
         buildUI();
         loadProjects();
         I18n.onLocaleChange(() -> setTitle(I18n.t("app.title")));
@@ -152,5 +155,13 @@ public class MainFrame extends JFrame {
                 }
             }
         }.execute();
+    }
+
+    /** Loads ~/Downloads/icon.png and sets it as the window icon (silent no-op if missing). */
+    static void loadAppIcon(JFrame frame) {
+        try {
+            File f = new File(System.getProperty("user.home") + "/Downloads/icon.png");
+            if (f.exists()) frame.setIconImage(ImageIO.read(f));
+        } catch (Exception ignored) {}
     }
 }

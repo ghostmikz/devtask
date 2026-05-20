@@ -50,10 +50,6 @@ public class SettingsPanel extends JPanel {
 
         // ── Appearance card ───────────────────────────────────────────────────
         body.add(sectionCard(I18n.t("settings.appearance"), buildAppearanceSection()));
-        body.add(Box.createVerticalStrut(14));
-
-        // ── About card ────────────────────────────────────────────────────────
-        body.add(sectionCard(I18n.t("settings.about"), buildAboutSection()));
 
         JPanel topAlign = new JPanel(new BorderLayout());
         topAlign.setBackground(BG);

@@ -45,6 +45,7 @@ public class LoginFrame extends JFrame {
         setTitle(I18n.t("app.title"));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setMinimumSize(new Dimension(600, 500));
+        MainFrame.loadAppIcon(this);
         buildUI();
         I18n.onLocaleChange(this::refreshText);
     }
