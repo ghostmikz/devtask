@@ -7,6 +7,7 @@ import mongolup.server.model.Project;
 import mongolup.server.model.User;
 import mongolup.client.ui.components.AvatarLabel;
 import mongolup.client.ui.components.RoundedPanel;
+import mongolup.client.ui.components.ToastManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -262,8 +263,59 @@ public class ProjectsPanel extends JPanel {
         badge.setOpaque(true);
         badge.setBorder(new EmptyBorder(3, 9, 3, 9));
 
+        // ⋯ menu button (archive)
+        User me = AppContext.getInstance().getCurrentUser();
+        boolean isOwner = me != null && me.getUserId() == p.getOwnerId();
+        JLabel menuBtn = new JLabel("⋯");
+        menuBtn.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        menuBtn.setForeground(SEC);
+        menuBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        menuBtn.setVisible(isOwner);
+        menuBtn.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                e.consume();
+                JPopupMenu menu = new JPopupMenu();
+                JMenuItem archiveItem = new JMenuItem(I18n.t("projects.archive"));
+                archiveItem.setForeground(new Color(0xA32D2D));
+                archiveItem.addActionListener(ae -> {
+                    int choice = JOptionPane.showConfirmDialog(
+                            ProjectsPanel.this,
+                            I18n.t("projects.archive.confirm"),
+                            I18n.t("projects.archive"),
+                            JOptionPane.YES_NO_OPTION);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        new SwingWorker<Boolean, Void>() {
+                            @Override protected Boolean doInBackground() throws Exception {
+                                var r = ServerConnection.getInstance()
+                                        .send("ARCHIVE_PROJECT", p.getProjectId());
+                                return r.isSuccess();
+                            }
+                            @Override protected void done() {
+                                try {
+                                    if (get()) {
+                                        ToastManager.success(I18n.t("toast.project_archived"));
+                                        load();
+                                        if (onProjectsChanged != null) onProjectsChanged.run();
+                                    }
+                                } catch (Exception ignored) {}
+                            }
+                        }.execute();
+                    }
+                });
+                menu.add(archiveItem);
+                menu.show(menuBtn, 0, menuBtn.getHeight());
+            }
+            @Override public void mouseEntered(MouseEvent e) { menuBtn.setForeground(TEXT); }
+            @Override public void mouseExited(MouseEvent e)  { menuBtn.setForeground(SEC); }
+        });
+
+        JPanel topRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        topRight.setBackground(CARD);
+        topRight.add(badge);
+        topRight.add(menuBtn);
+
         topRow.add(icon, BorderLayout.WEST);
-        topRow.add(badge, BorderLayout.EAST);
+        topRow.add(topRight, BorderLayout.EAST);
         card.add(topRow, BorderLayout.NORTH);
 
         // Body: name + desc + progress
@@ -483,6 +535,7 @@ public class ProjectsPanel extends JPanel {
                     try {
                         if (get()) {
                             dlg.dispose();
+                            ToastManager.success(I18n.t("toast.member_added"));
                             load(); // refresh project cards
                         }
                     } catch (Exception ignored) {}

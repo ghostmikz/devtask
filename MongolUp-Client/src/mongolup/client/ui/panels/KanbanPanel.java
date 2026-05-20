@@ -4,6 +4,7 @@ import mongolup.client.AppContext;
 import mongolup.client.EventBus;
 import mongolup.client.ServerConnection;
 import mongolup.client.i18n.I18n;
+import mongolup.client.ui.components.ToastManager;
 import mongolup.server.model.*;
 import mongolup.client.ui.panels.kanban.KanbanColumn;
 import mongolup.client.ui.panels.kanban.TaskDetailDialog;
@@ -122,7 +123,7 @@ public class KanbanPanel extends JPanel {
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dlg = new JDialog(owner, I18n.t("task.new.title"),
                 Dialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(460, 480);
+        dlg.setSize(460, 560);
         dlg.setLocationRelativeTo(owner);
         dlg.setResizable(false);
 
@@ -173,6 +174,19 @@ public class KanbanPanel extends JPanel {
         weightSpinner.setBackground(new Color(0xFAFAF8));
         ((JSpinner.DefaultEditor) weightSpinner.getEditor()).getTextField().setBackground(new Color(0xFAFAF8));
 
+        SpinnerDateModel dateModel = new SpinnerDateModel();
+        JSpinner dueDateSpinner = new JSpinner(dateModel);
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dueDateSpinner, "yyyy-MM-dd");
+        dueDateSpinner.setEditor(dateEditor);
+        dueDateSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        dueDateSpinner.setBackground(new Color(0xFAFAF8));
+        // "No due date" checkbox
+        JCheckBox noDueDate = new JCheckBox(I18n.t("task.no_due_date"), true);
+        noDueDate.setBackground(Color.WHITE);
+        noDueDate.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        noDueDate.addActionListener(e -> dueDateSpinner.setEnabled(!noDueDate.isSelected()));
+        dueDateSpinner.setEnabled(false);
+
         String[] colNames = columns.stream()
                 .map(c -> c.getStatus().getName()).toArray(String[]::new);
         JComboBox<String> colBox = new JComboBox<>(colNames);
@@ -192,10 +206,14 @@ public class KanbanPanel extends JPanel {
         gc.gridy = 3; form.add(descScroll, gc);
         gc.gridy = 4; form.add(inputLabel(I18n.t("task.priority")), gc);
         gc.gridy = 5; form.add(prioBox, gc);
-        gc.gridy = 6; form.add(inputLabel(I18n.t("task.points")), gc);
-        gc.gridy = 7; form.add(weightSpinner, gc);
-        gc.gridy = 8; form.add(inputLabel(I18n.t("kanban.column")), gc);
-        gc.gridy = 9; form.add(colBox, gc);
+        gc.gridy = 6; form.add(inputLabel(I18n.t("task.due_date")), gc);
+        gc.gridy = 7; form.add(noDueDate, gc);
+        gc.insets = new Insets(0, 0, 8, 0);
+        gc.gridy = 8; form.add(dueDateSpinner, gc);
+        gc.gridy = 9; form.add(inputLabel(I18n.t("task.points")), gc);
+        gc.gridy = 10; form.add(weightSpinner, gc);
+        gc.gridy = 11; form.add(inputLabel(I18n.t("kanban.column")), gc);
+        gc.gridy = 12; form.add(colBox, gc);
         root.add(form, BorderLayout.CENTER);
 
         // Buttons
@@ -222,6 +240,7 @@ public class KanbanPanel extends JPanel {
             t.setDescription(descField.getText().trim());
             t.setPriority(prioBox.getSelectedIndex() + 1);
             t.setWeight((Integer) weightSpinner.getValue());
+            if (!noDueDate.isSelected()) t.setDueDate((java.util.Date) dateModel.getValue());
             t.setStatusId(status.getStatusId());
             dlg.dispose();
             new SwingWorker<Task, Void>() {
@@ -232,7 +251,10 @@ public class KanbanPanel extends JPanel {
                 @Override protected void done() {
                     try {
                         Task created = get();
-                        if (created != null) addTaskToColumn(created);
+                        if (created != null) {
+                            addTaskToColumn(created);
+                            ToastManager.success(I18n.t("toast.task_created"));
+                        }
                     } catch (Exception ignored) {}
                 }
             }.execute();
@@ -271,15 +293,20 @@ public class KanbanPanel extends JPanel {
     private void buildColumns(List<Status> statuses, List<Task> tasks) {
         columns.clear();
         columnsArea.removeAll();
-        columnsArea.setLayout(new GridLayout(1, statuses.size(), 12, 0));
+        // +1 for the "Add Column" button at the end
+        columnsArea.setLayout(new GridLayout(1, statuses.size() + 1, 12, 0));
 
         for (Status status : statuses) {
             Consumer<Void> addCallback = v -> showNewTaskDialog(status.getStatusId());
             KanbanColumn col = new KanbanColumn(status, addCallback,
-                    this::onCardDropped, this::onCardClicked);
+                    this::onCardDropped, this::onCardClicked,
+                    this::onCardMarkedDone, this::load);
             columns.add(col);
             columnsArea.add(col);
         }
+
+        // "Add Column" button at the end
+        columnsArea.add(buildAddColumnButton());
 
         // Distribute tasks to columns
         for (Task task : tasks) {
@@ -331,6 +358,64 @@ public class KanbanPanel extends JPanel {
                 try {
                     if (get()) load(); // full reload to show updated state
                 } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
+
+    private void onCardMarkedDone(Task task) {
+        Project project = AppContext.getInstance().getCurrentProject();
+        if (project == null) return;
+        new SwingWorker<Boolean, Void>() {
+            @Override protected Boolean doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("MARK_TASK_DONE",
+                        new int[]{task.getTaskId(), project.getProjectId()});
+                return r.isSuccess();
+            }
+            @Override protected void done() {
+                try {
+                    if (get()) { ToastManager.success(I18n.t("toast.task_done")); load(); }
+                } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
+
+    private JPanel buildAddColumnButton() {
+        JPanel addCol = new JPanel(new GridBagLayout());
+        addCol.setOpaque(false);
+        addCol.setMinimumSize(new Dimension(160, 0));
+        addCol.setPreferredSize(new Dimension(180, 0));
+
+        JLabel lbl = new JLabel(I18n.t("kanban.add_column"));
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lbl.setForeground(new Color(0x888780));
+        lbl.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createDashedBorder(new Color(0xE8E8E5), 6, 4),
+                new EmptyBorder(12, 18, 12, 18)));
+        lbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lbl.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override public void mouseClicked(java.awt.event.MouseEvent e) { showAddColumnDialog(); }
+            @Override public void mouseEntered(java.awt.event.MouseEvent e) { lbl.setForeground(new Color(0x1A1A18)); }
+            @Override public void mouseExited(java.awt.event.MouseEvent e)  { lbl.setForeground(new Color(0x888780)); }
+        });
+        addCol.add(lbl);
+        return addCol;
+    }
+
+    private void showAddColumnDialog() {
+        Project project = AppContext.getInstance().getCurrentProject();
+        if (project == null) return;
+        String name = JOptionPane.showInputDialog(this, I18n.t("kanban.add_column"),
+                I18n.t("kanban.add_column"), JOptionPane.PLAIN_MESSAGE);
+        if (name == null || name.isBlank()) return;
+        new SwingWorker<Boolean, Void>() {
+            @Override protected Boolean doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("CREATE_STATUS",
+                        new Object[]{project.getProjectId(), name.trim(), "#9CA3AF"});
+                return r.isSuccess();
+            }
+            @Override protected void done() {
+                try { if (get()) { ToastManager.success(I18n.t("toast.column_added")); load(); } }
+                catch (Exception ignored) {}
             }
         }.execute();
     }

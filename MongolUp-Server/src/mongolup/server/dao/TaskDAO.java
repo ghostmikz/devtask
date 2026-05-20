@@ -138,6 +138,23 @@ public class TaskDAO {
         }
     }
 
+    public boolean markTaskDone(int taskId, int projectId) throws SQLException {
+        // Find the 'done'-type status for this project
+        String sql =
+            "UPDATE tasks SET status_id = (" +
+            "  SELECT status_id FROM statuses " +
+            "  WHERE project_id = ? AND type = 'done' " +
+            "  ORDER BY sort_order DESC LIMIT 1" +
+            "), updated_at = NOW() " +
+            "WHERE task_id = ?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, projectId);
+            ps.setInt(2, taskId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     public boolean deleteTask(int taskId) throws SQLException {
         // Remove child rows first to avoid FK violations
         try (Connection c = DatabaseConnection.getConnection()) {

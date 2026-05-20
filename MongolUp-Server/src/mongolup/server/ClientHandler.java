@@ -78,10 +78,14 @@ public class ClientHandler implements Runnable {
                 case "GET_PROJECTS"      -> handleGetProjects(req);
                 case "CREATE_PROJECT"    -> handleCreateProject(req);
                 case "GET_STATUSES"      -> handleGetStatuses(req);
+                case "CREATE_STATUS"     -> handleCreateStatus(req);
+                case "RENAME_STATUS"     -> handleRenameStatus(req);
+                case "DELETE_STATUS"     -> handleDeleteStatus(req);
                 case "GET_TASKS"         -> handleGetTasks(req);
                 case "CREATE_TASK"       -> handleCreateTask(req);
                 case "UPDATE_TASK"       -> handleUpdateTask(req);
                 case "DELETE_TASK"       -> handleDeleteTask(req);
+                case "MARK_TASK_DONE"    -> handleMarkTaskDone(req);
                 case "UPDATE_TASK_STATUS"-> handleUpdateTaskStatus(req);
                 case "GET_TASK_DETAIL"   -> handleGetTaskDetail(req);
                 case "GET_MY_TASKS"      -> handleGetMyTasks(req);
@@ -96,6 +100,7 @@ public class ClientHandler implements Runnable {
                 case "UPDATE_PROFILE"       -> handleUpdateProfile(req);
                 case "CHANGE_PASSWORD"      -> handleChangePassword(req);
                 case "ADD_PROJECT_MEMBER"   -> handleAddProjectMember(req);
+                case "ARCHIVE_PROJECT"      -> handleArchiveProject(req);
                 case "REMOVE_PROJECT_MEMBER"-> handleRemoveProjectMember(req);
                 default -> Response.fail(req.getRequestId(), "Unknown action: " + action);
             };
@@ -175,6 +180,29 @@ public class ClientHandler implements Runnable {
         return Response.ok(req.getRequestId(), (java.io.Serializable) statuses);
     }
 
+    private Response handleCreateStatus(Request req) throws Exception {
+        requireAuth(req);
+        Object[] args = (Object[]) req.getPayload(); // [projectId, name, color]
+        Status s = statusDAO.createStatus((Integer) args[0], (String) args[1], (String) args[2]);
+        return Response.ok(req.getRequestId(), s);
+    }
+
+    private Response handleRenameStatus(Request req) throws Exception {
+        requireAuth(req);
+        Object[] args = (Object[]) req.getPayload(); // [statusId, newName]
+        boolean ok = statusDAO.renameStatus((Integer) args[0], (String) args[1]);
+        return ok ? Response.ok(req.getRequestId(), null)
+                  : Response.fail(req.getRequestId(), "Status not found");
+    }
+
+    private Response handleDeleteStatus(Request req) throws Exception {
+        requireAuth(req);
+        int statusId = (Integer) req.getPayload();
+        boolean ok = statusDAO.deleteStatus(statusId);
+        return ok ? Response.ok(req.getRequestId(), null)
+                  : Response.fail(req.getRequestId(), "Status not found");
+    }
+
     // ── tasks ─────────────────────────────────────────────────────────────────
 
     private Response handleGetTasks(Request req) throws Exception {
@@ -208,6 +236,21 @@ public class ClientHandler implements Runnable {
                 new UpdateEvent(UpdateEvent.Type.TASK_UPDATED, task.getProjectId(), task), this);
         return ok ? Response.ok(req.getRequestId(), task)
                   : Response.fail(req.getRequestId(), "Task not found");
+    }
+
+    private Response handleMarkTaskDone(Request req) throws Exception {
+        User u = requireAuth(req);
+        int[] ids = (int[]) req.getPayload(); // [taskId, projectId]
+        boolean ok = taskDAO.markTaskDone(ids[0], ids[1]);
+        if (ok) {
+            Task stub = new Task();
+            stub.setTaskId(ids[0]);
+            stub.setProjectId(ids[1]);
+            BroadcastService.getInstance().broadcast(
+                    new UpdateEvent(UpdateEvent.Type.TASK_STATUS_CHANGED, ids[1], stub), this);
+        }
+        return ok ? Response.ok(req.getRequestId(), null)
+                  : Response.fail(req.getRequestId(), "Update failed");
     }
 
     private Response handleDeleteTask(Request req) throws Exception {
@@ -335,6 +378,14 @@ public class ClientHandler implements Runnable {
     }
 
     // ── project members ───────────────────────────────────────────────────────
+
+    private Response handleArchiveProject(Request req) throws Exception {
+        User u = requireAuth(req);
+        int projectId = (Integer) req.getPayload();
+        boolean ok = projectDAO.archiveProject(projectId, u.getUserId());
+        return ok ? Response.ok(req.getRequestId(), null)
+                  : Response.fail(req.getRequestId(), "not_owner");
+    }
 
     private Response handleAddProjectMember(Request req) throws Exception {
         requireAuth(req);

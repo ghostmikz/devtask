@@ -10,6 +10,8 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * A Kanban card that is both draggable (DragSource) and displays task info.
@@ -29,13 +31,19 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
 
     private final Task task;
     private final Runnable onClick;
+    private final Runnable onMarkDone; // nullable — null means checkbox hidden
 
     private static final int RADIUS = 10;
     private Color currentBorder = BORDER;
 
     public TaskCard(Task task, Runnable onClick) {
-        this.task    = task;
-        this.onClick = onClick;
+        this(task, onClick, null);
+    }
+
+    public TaskCard(Task task, Runnable onClick, Runnable onMarkDone) {
+        this.task       = task;
+        this.onClick    = onClick;
+        this.onMarkDone = onMarkDone;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(task.isDone() ? new Color(0xFAFAF8) : CARD_BG);
         setBorder(new EmptyBorder(11, 12, 11, 12));
@@ -63,17 +71,34 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
     public Task getTask() { return task; }
 
     private void buildContent() {
-        // Title
-        JLabel title = new JLabel("<html><body style='width:160px'>" +
+        // Title row: optional done checkbox + text
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        titleRow.setOpaque(false);
+        titleRow.setAlignmentX(LEFT_ALIGNMENT);
+
+        if (onMarkDone != null) {
+            JCheckBox check = new JCheckBox();
+            check.setSelected(task.isDone());
+            check.setOpaque(false);
+            check.setFocusPainted(false);
+            check.setMargin(new Insets(0, 0, 0, 0));
+            check.addActionListener(e -> {
+                if (!task.isDone() && onMarkDone != null) onMarkDone.run();
+                else check.setSelected(true); // can't uncheck here
+            });
+            titleRow.add(check);
+        }
+
+        JLabel title = new JLabel("<html><body style='width:140px'>" +
                 escapeHtml(task.getTitle()) + "</body></html>");
         title.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         title.setForeground(task.isDone() ? TEXT_SEC : TEXT_PRI);
         if (task.isDone()) {
-            title.setText("<html><body style='width:160px'><s>" +
+            title.setText("<html><body style='width:140px'><s>" +
                     escapeHtml(task.getTitle()) + "</s></body></html>");
         }
-        title.setAlignmentX(LEFT_ALIGNMENT);
-        add(title);
+        titleRow.add(title);
+        add(titleRow);
         add(Box.createVerticalStrut(8));
 
         // Status/label tag
@@ -104,6 +129,16 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
         pts.add(dot);
         pts.add(wt);
         footer.add(pts, BorderLayout.WEST);
+
+        // Due date badge (right side of footer)
+        if (task.getDueDate() != null) {
+            boolean overdue = !task.isDone() && task.getDueDate().before(new Date());
+            String dateStr = new SimpleDateFormat("MM/dd").format(task.getDueDate());
+            JLabel dueLbl = new JLabel(overdue ? "⚠ " + dateStr : dateStr);
+            dueLbl.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            dueLbl.setForeground(overdue ? new Color(0xA32D2D) : TEXT_SEC);
+            footer.add(dueLbl, BorderLayout.EAST);
+        }
 
         add(footer);
     }

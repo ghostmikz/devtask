@@ -3,6 +3,7 @@ package mongolup.client.ui.panels.kanban;
 import mongolup.client.AppContext;
 import mongolup.client.ServerConnection;
 import mongolup.client.i18n.I18n;
+import mongolup.client.ui.components.ToastManager;
 import mongolup.server.model.Comment;
 import mongolup.server.model.Label;
 import mongolup.server.model.Task;
@@ -350,7 +351,10 @@ public class TaskDetailDialog extends JDialog {
                 ServerConnection.getInstance().send("UPDATE_TASK", task);
                 return null;
             }
-            @Override protected void done() { dispose(); }
+            @Override protected void done() {
+                ToastManager.success(I18n.t("toast.task_saved"));
+                dispose();
+            }
         }.execute();
     }
 

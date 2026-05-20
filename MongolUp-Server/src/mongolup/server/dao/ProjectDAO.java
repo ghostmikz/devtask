@@ -89,6 +89,18 @@ public class ProjectDAO {
         return members;
     }
 
+    /** Archive a project (only the owner can do it). */
+    public boolean archiveProject(int projectId, int requestingUserId) throws SQLException {
+        String sql = "UPDATE projects SET is_archived = TRUE " +
+                     "WHERE project_id = ? AND owner_id = ?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, projectId);
+            ps.setInt(2, requestingUserId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     /** Public: add a member to a project (called by ClientHandler). */
     public boolean addProjectMember(int projectId, int userId) throws SQLException {
         try (Connection c = DatabaseConnection.getConnection()) {
