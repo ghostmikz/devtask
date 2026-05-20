@@ -154,9 +154,29 @@ public class TaskDetailDialog extends JDialog {
         content.add(sectionCard(() -> {
             JPanel p = new JPanel(new BorderLayout(0, 8));
             p.setBackground(CARD);
-            p.add(fieldLabel(I18n.t("task.assignees")), BorderLayout.NORTH);
-            assigneesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+
+            // header row: label + "+ Assign" button side by side
+            JPanel hdr = new JPanel(new BorderLayout());
+            hdr.setBackground(CARD);
+            hdr.add(fieldLabel(I18n.t("task.assignees")), BorderLayout.WEST);
+            JButton addBtn = new JButton("+ " + I18n.t("btn.assign"));
+            addBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            addBtn.setForeground(SUCCESS);
+            addBtn.setBackground(CARD);
+            addBtn.setBorderPainted(false);
+            addBtn.setContentAreaFilled(false);
+            addBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addBtn.addActionListener(e -> showAssigneeDialog());
+            hdr.add(addBtn, BorderLayout.EAST);
+            p.add(hdr, BorderLayout.NORTH);
+
+            assigneesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
             assigneesPanel.setBackground(CARD);
+            // placeholder shown until server responds
+            JLabel placeholder = new JLabel(I18n.t("task.no_assignees"));
+            placeholder.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+            placeholder.setForeground(TEXT_SEC);
+            assigneesPanel.add(placeholder);
             p.add(assigneesPanel, BorderLayout.CENTER);
             return p;
         }));
@@ -302,23 +322,41 @@ public class TaskDetailDialog extends JDialog {
 
     private void populateAssignees(List<User> assignees) {
         assigneesPanel.removeAll();
-        if (assignees != null) {
+        boolean hasAny = assignees != null && !assignees.isEmpty();
+        if (hasAny) {
             for (User u : assignees) {
                 Color av = avatarColor(u.getUserId());
                 AvatarLabel a = new AvatarLabel(u.getInitials(), av, 28);
                 a.setToolTipText(u.getFullName() != null ? u.getFullName() : u.getUsername());
+                // click avatar to remove
+                a.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                final int uid = u.getUserId();
+                a.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) {
+                        int r = JOptionPane.showConfirmDialog(TaskDetailDialog.this,
+                                I18n.t("task.remove_assignee") + " " +
+                                (u.getFullName() != null ? u.getFullName() : u.getUsername()) + "?",
+                                "", JOptionPane.YES_NO_OPTION);
+                        if (r == JOptionPane.YES_OPTION) {
+                            new SwingWorker<Void, Void>() {
+                                @Override protected Void doInBackground() throws Exception {
+                                    ServerConnection.getInstance().send("REMOVE_ASSIGNEE",
+                                            new int[]{task.getTaskId(), uid});
+                                    return null;
+                                }
+                                @Override protected void done() { loadDetail(); }
+                            }.execute();
+                        }
+                    }
+                });
                 assigneesPanel.add(a);
             }
+        } else {
+            JLabel empty = new JLabel(I18n.t("task.no_assignees"));
+            empty.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+            empty.setForeground(TEXT_SEC);
+            assigneesPanel.add(empty);
         }
-        // Add user button
-        JButton addUser = new JButton("+");
-        addUser.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        addUser.setForeground(TEXT_SEC);
-        addUser.setBorderPainted(false);
-        addUser.setContentAreaFilled(false);
-        addUser.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        addUser.addActionListener(e -> showAssigneeDialog());
-        assigneesPanel.add(addUser);
         assigneesPanel.revalidate();
         assigneesPanel.repaint();
     }
