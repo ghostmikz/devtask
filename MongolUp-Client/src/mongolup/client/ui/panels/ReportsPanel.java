@@ -130,14 +130,23 @@ public class ReportsPanel extends JPanel {
         statsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 112));
         statsRow.setPreferredSize(new Dimension(0, 112));
 
-        String doneRate = total > 0 ? Math.round(100.0 * done  / total) + "% complete"   : "No tasks";
-        String onTmLbl  = total > 0 ? onTime + " tasks on schedule"                        : "No data";
-        String ovdLbl   = overdue > 0 ? "Need attention" : "All on track";
+        String doneRate = total > 0
+                ? Math.round(100.0 * done  / total) + I18n.t("reports.sub.pct_complete")
+                : I18n.t("reports.sub.no_tasks");
+        String onTmLbl  = total > 0
+                ? onTime + " " + I18n.t("reports.sub.on_schedule")
+                : I18n.t("reports.sub.no_data");
+        String ovdLbl   = overdue > 0
+                ? I18n.t("reports.sub.need_attention")
+                : I18n.t("reports.sub.all_on_track");
 
-        statsRow.add(statCard(I18n.t("reports.total_tasks"), String.valueOf(total),  BLUE,    "active tasks",  null));
-        statsRow.add(statCard(I18n.t("reports.done"),        String.valueOf(done),   SUCCESS, doneRate,        null));
+        statsRow.add(statCard(I18n.t("reports.total_tasks"), String.valueOf(total),
+                BLUE,    I18n.t("reports.sub.active"), null));
+        statsRow.add(statCard(I18n.t("reports.done"),        String.valueOf(done),
+                SUCCESS, doneRate,                      null));
         statsRow.add(statCard(I18n.t("reports.on_time"),
-                total > 0 ? Math.round(100.0 * onTime / total) + "%" : "—",         SUCCESS, onTmLbl,         null));
+                total > 0 ? Math.round(100.0 * onTime / total) + "%" : "—",
+                SUCCESS, onTmLbl, null));
         statsRow.add(statCard(I18n.t("reports.overdue"),     String.valueOf(overdue),
                 overdue > 0 ? ERR : SUCCESS, ovdLbl, null));
 

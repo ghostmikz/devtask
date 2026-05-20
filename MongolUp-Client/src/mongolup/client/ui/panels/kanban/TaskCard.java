@@ -9,7 +9,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -71,49 +72,17 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
     public Task getTask() { return task; }
 
     private void buildContent() {
-        // Title row: optional done checkbox + text
+        // Title row — no checkbox (mark done by dragging to done column)
         JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         titleRow.setOpaque(false);
         titleRow.setAlignmentX(LEFT_ALIGNMENT);
 
-        if (onMarkDone != null) {
-            JCheckBox check = new JCheckBox();
-            check.setSelected(task.isDone());
-            check.setOpaque(false);
-            check.setFocusPainted(false);
-            check.setMargin(new Insets(0, 0, 0, 0));
-            check.addActionListener(e -> {
-                if (!task.isDone() && onMarkDone != null) {
-                    check.setEnabled(false);
-                    Color origBg = getBackground();
-                    javax.swing.Timer flash = new javax.swing.Timer(90, null);
-                    int[] tick = {0};
-                    flash.addActionListener(fe -> {
-                        tick[0]++;
-                        setBackground(tick[0] % 2 == 0 ? origBg : new Color(0xD1FAE5));
-                        repaint();
-                        if (tick[0] >= 4) {
-                            flash.stop();
-                            setBackground(origBg);
-                            onMarkDone.run();
-                        }
-                    });
-                    flash.start();
-                } else {
-                    check.setSelected(true); // already done; use drag to move back
-                }
-            });
-            titleRow.add(check);
-        }
-
-        JLabel title = new JLabel("<html><body style='width:140px'>" +
-                escapeHtml(task.getTitle()) + "</body></html>");
+        String titleHtml = task.isDone()
+                ? "<html><body style='width:160px'><s>" + escapeHtml(task.getTitle()) + "</s></body></html>"
+                : "<html><body style='width:160px'>"    + escapeHtml(task.getTitle()) + "</body></html>";
+        JLabel title = new JLabel(titleHtml);
         title.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         title.setForeground(task.isDone() ? TEXT_SEC : TEXT_PRI);
-        if (task.isDone()) {
-            title.setText("<html><body style='width:140px'><s>" +
-                    escapeHtml(task.getTitle()) + "</s></body></html>");
-        }
         titleRow.add(title);
         add(titleRow);
         add(Box.createVerticalStrut(8));
@@ -170,9 +139,6 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             @Override public void mouseEntered(MouseEvent e) { currentBorder = HOVER_BDR; repaint(); }
             @Override public void mouseExited (MouseEvent e) { currentBorder = BORDER;    repaint(); }
             @Override public void mouseClicked(MouseEvent e) {
-                // Don't open dialog when the click landed on the checkbox
-                Component src = SwingUtilities.getDeepestComponentAt(TaskCard.this, e.getX(), e.getY());
-                if (src instanceof JCheckBox) return;
                 if (onClick != null) onClick.run();
             }
         });

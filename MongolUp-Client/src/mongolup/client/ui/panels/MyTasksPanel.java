@@ -191,28 +191,21 @@ public class MyTasksPanel extends JPanel {
         inner.setBackground(CARD);
         inner.setBorder(new EmptyBorder(11, 16, 11, 16));
 
-        // ── left: checkbox + priority dot + title
+        // ── left: priority dot + title (no checkbox — read-only list)
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         left.setBackground(CARD);
-
-        JCheckBox check = new JCheckBox();
-        check.setSelected(task.isDone());
-        check.setBackground(CARD);
-        check.setFocusPainted(false);
 
         JLabel dot = new JLabel("●");
         dot.setFont(new Font("Segoe UI", Font.PLAIN, 9));
         dot.setForeground(Color.decode(task.getPriorityColor()));
 
         JLabel name = new JLabel(task.getTitle());
-        name.setFont(new Font("Segoe UI", task.isDone() ? Font.PLAIN : Font.PLAIN, 13));
+        name.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         name.setForeground(task.isDone() ? TEXT_SEC : TEXT_PRI);
         if (task.isDone()) {
-            // strikethrough effect
             name.setText("<html><strike>" + escHtml(task.getTitle()) + "</strike></html>");
         }
 
-        left.add(check);
         left.add(dot);
         left.add(name);
 

@@ -279,8 +279,23 @@ public class TaskDetailDialog extends JDialog {
                         populateLabels(detail.getLabels());
                         populateAttachments(detail.getAttachments());
                         populateComments(detail.getComments());
+                        // Force the scroll pane to re-measure all card sizes
+                        SwingUtilities.invokeLater(() -> {
+                            revalidate();
+                            repaint();
+                        });
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    // Surface the error so we can diagnose — show in assignees area
+                    if (assigneesPanel != null) {
+                        assigneesPanel.removeAll();
+                        JLabel err = new JLabel("Load error: " + e.getMessage());
+                        err.setForeground(new Color(0xA32D2D));
+                        err.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                        assigneesPanel.add(err);
+                        assigneesPanel.revalidate();
+                    }
+                }
             }
         }.execute();
     }
