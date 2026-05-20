@@ -49,7 +49,7 @@ public class TopbarPanel extends JPanel {
         // LEFT: breadcrumb
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 14));
         left.setBackground(BG);
-        JLabel proj = new JLabel("MongolUp");
+        JLabel proj = new JLabel("DevTask");
         proj.setForeground(TEXT_SEC);
         proj.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         JLabel sep = new JLabel("/");

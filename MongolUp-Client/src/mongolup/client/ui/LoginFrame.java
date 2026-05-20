@@ -69,7 +69,7 @@ public class LoginFrame extends JFrame {
         JLabel dot = new JLabel("●");
         dot.setForeground(new Color(0x4ADE80));
         dot.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        JLabel logo = new JLabel("MongolUp");
+        JLabel logo = new JLabel("DevTask");
         logo.setFont(new Font("Segoe UI", Font.BOLD, 20));
         logo.setForeground(ACCENT);
         header.add(dot);

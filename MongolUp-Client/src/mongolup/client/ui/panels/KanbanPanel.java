@@ -116,7 +116,7 @@ public class KanbanPanel extends JPanel {
         Project project = AppContext.getInstance().getCurrentProject();
         if (project == null) {
             JOptionPane.showMessageDialog(this, I18n.t("error.no_project"),
-                    "MongolUp", JOptionPane.WARNING_MESSAGE);
+                    "DevTask", JOptionPane.WARNING_MESSAGE);
             return;
         }
 

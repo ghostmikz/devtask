@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Manages the single TCP socket connection to the MongolUp server.
+ * Manages the single TCP socket connection to the DevTask server.
  * <p>
  * – send() is blocking (waits up to TIMEOUT_MS for the matching response).
  * – A background ListenerThread routes incoming responses:

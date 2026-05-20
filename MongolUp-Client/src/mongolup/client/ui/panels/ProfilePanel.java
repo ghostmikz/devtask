@@ -122,7 +122,7 @@ public class ProfilePanel extends JPanel {
         card.add(nameLabel);
         card.add(Box.createVerticalStrut(4));
 
-        JLabel role = new JLabel("Lead Developer · MongolUp");
+        JLabel role = new JLabel("Lead Developer · DevTask");
         role.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         role.setForeground(SEC);
         role.setAlignmentX(CENTER_ALIGNMENT);

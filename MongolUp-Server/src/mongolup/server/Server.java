@@ -19,7 +19,7 @@ public class Server {
     }
 
     public void start() {
-        LOG.info("MongolUp Server starting on port " + port);
+        LOG.info("DevTask Server starting on port " + port);
         try (ServerSocket ss = new ServerSocket(port)) {
             LOG.info("Server ready. Waiting for connections...");
             while (running) {

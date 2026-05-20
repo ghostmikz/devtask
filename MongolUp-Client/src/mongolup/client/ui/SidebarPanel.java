@@ -65,7 +65,7 @@ public class SidebarPanel extends JPanel {
         JLabel dotL = new JLabel("●");
         dotL.setForeground(DOT_ONLINE);
         dotL.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        JLabel logoText = new JLabel("MongolUp");
+        JLabel logoText = new JLabel("DevTask");
         logoText.setFont(new Font("Segoe UI", Font.BOLD, 17));
         logoText.setForeground(TEXT_FULL);
         logoRow.add(dotL);

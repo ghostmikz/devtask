@@ -139,7 +139,7 @@ public class SettingsPanel extends JPanel {
         p.setBackground(CARD);
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 
-        p.add(aboutRow("MongolUp", "v1.0.0"));
+        p.add(aboutRow("DevTask", "v1.0.0"));
         p.add(Box.createVerticalStrut(6));
         p.add(aboutRow(I18n.t("settings.about.tech"), "Java 17 · Swing · MySQL · FlatLaf"));
         p.add(Box.createVerticalStrut(6));
