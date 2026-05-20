@@ -79,8 +79,6 @@ public class ProfilePanel extends JPanel {
         left.setBackground(BG);
         left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
         left.add(buildProfileCard());
-        left.add(Box.createVerticalStrut(14));
-        left.add(buildNotifCard());
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.3;
         layout.add(left, gbc);
@@ -220,26 +218,6 @@ public class ProfilePanel extends JPanel {
         return card;
     }
 
-    private JPanel buildNotifCard() {
-        JPanel card = new JPanel();
-        card.setBackground(CARD);
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER),
-                new EmptyBorder(20, 20, 20, 20)));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
-        card.add(sectionTitle(I18n.t("profile.notif.title")));
-        card.add(Box.createVerticalStrut(8));
-
-        String[] keys = {"task_updated", "mentioned", "sprint", "email", "overdue"};
-        boolean[] defaults = {true, true, true, false, true};
-        for (int i = 0; i < keys.length; i++) {
-            card.add(notifRow(I18n.t("profile.notif." + keys[i]), defaults[i]));
-            card.add(makeSep());
-        }
-        return card;
-    }
-
     // ── actions ───────────────────────────────────────────────────────────────
 
     public void load() {
@@ -327,22 +305,6 @@ public class ProfilePanel extends JPanel {
     }
 
     // ── UI helpers ────────────────────────────────────────────────────────────
-
-    private JPanel notifRow(String label, boolean on) {
-        JPanel row = new JPanel(new BorderLayout());
-        row.setBackground(CARD);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lbl.setForeground(TEXT);
-        // Simple toggle checkbox
-        JCheckBox toggle = new JCheckBox();
-        toggle.setSelected(on);
-        toggle.setBackground(CARD);
-        row.add(lbl, BorderLayout.WEST);
-        row.add(toggle, BorderLayout.EAST);
-        return row;
-    }
 
     private JPanel statCell(String val, String label) {
         JPanel p = new JPanel();
@@ -440,10 +402,4 @@ public class ProfilePanel extends JPanel {
         return b;
     }
 
-    private JSeparator makeSep() {
-        JSeparator sep = new JSeparator();
-        sep.setForeground(BORDER);
-        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        return sep;
-    }
 }

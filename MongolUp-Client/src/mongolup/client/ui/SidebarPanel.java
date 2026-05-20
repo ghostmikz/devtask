@@ -38,7 +38,7 @@ public class SidebarPanel extends JPanel {
     private final List<JPanel>     navItems        = new ArrayList<>();
     private final List<JPanel>     projItems       = new ArrayList<>();
     private JPanel                 projectListPanel;
-    private String                 activeNav       = "kanban";
+    private String                 activeNav       = "";
 
     public SidebarPanel(Consumer<String> pageCallback) {
         this.pageCallback = pageCallback;
@@ -50,13 +50,11 @@ public class SidebarPanel extends JPanel {
         I18n.onLocaleChange(this::rebuild);
     }
 
-    // ── build ─────────────────────────────────────────────────────────────────
 
     private void build() {
         removeAll();
         navItems.clear();
 
-        // Logo row
         JPanel logoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         logoRow.setBackground(BG);
         logoRow.setBorder(new EmptyBorder(18, 16, 14, 16));
@@ -75,7 +73,6 @@ public class SidebarPanel extends JPanel {
 
         // Main nav
         addSection(I18n.t("nav.main"));
-        addNavItem("kanban",   I18n.t("nav.kanban"),   null);
         addNavItem("tasks",    I18n.t("nav.mytasks"),   new Color(0xF59E0B));
         addNavItem("reports",  I18n.t("nav.reports"),  null);
         addNavItem("projects", I18n.t("nav.projects"), null);
@@ -90,11 +87,9 @@ public class SidebarPanel extends JPanel {
 
         add(Box.createVerticalGlue());
 
-        // Team section
         addTeamSection();
         addSeparator();
 
-        // Bottom nav
         addNavItem("profile",  I18n.t("nav.profile"),  null);
         addNavItem("settings", I18n.t("nav.settings"), null);
         add(Box.createVerticalStrut(12));
@@ -105,7 +100,6 @@ public class SidebarPanel extends JPanel {
 
     private void rebuild() { build(); }
 
-    // ── project list ──────────────────────────────────────────────────────────
 
     public void setProjects(List<Project> projects) {
         projItems.clear();
@@ -118,8 +112,6 @@ public class SidebarPanel extends JPanel {
         projectListPanel.revalidate();
         projectListPanel.repaint();
     }
-
-    // ── nav item ──────────────────────────────────────────────────────────────
 
     private void addNavItem(String pageId, String label, Color badgeColor) {
         boolean isActive = pageId.equals(activeNav);
@@ -136,11 +128,9 @@ public class SidebarPanel extends JPanel {
         inner.setOpaque(true);
         inner.setBorder(new EmptyBorder(0, 2, 0, 4));
 
-        // Icon
         JLabel iconLbl = new JLabel(loadIcon(pageId, isActive ? TEXT_FULL : TEXT_DIM));
         iconLbl.setPreferredSize(new Dimension(16, 16));
 
-        // Text
         JLabel textLbl = new JLabel(label);
         textLbl.setForeground(isActive ? TEXT_FULL : TEXT_DIM);
         textLbl.setFont(new Font("Segoe UI", isActive ? Font.BOLD : Font.PLAIN, 13));
@@ -208,8 +198,6 @@ public class SidebarPanel extends JPanel {
         return row;
     }
 
-    // ── active state ──────────────────────────────────────────────────────────
-
     private void setActive(String pageId) {
         activeNav = pageId;
         for (JPanel row : navItems) {
@@ -235,7 +223,6 @@ public class SidebarPanel extends JPanel {
 
     public void setActivePage(String pageId) { setActive(pageId); }
 
-    // ── helpers ───────────────────────────────────────────────────────────────
 
     private void addTeamSection() {
         addSection(I18n.t("nav.team"));
@@ -277,14 +264,12 @@ public class SidebarPanel extends JPanel {
         add(sep);
     }
 
-    // ── icon loading ──────────────────────────────────────────────────────────
 
     private Icon loadIcon(String pageId, Color tint) {
         String path = "mongolup/client/resources/icons/" + pageId + ".png";
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
             if (is != null) {
                 BufferedImage raw = ImageIO.read(is);
-                // Tint the icon to match active/inactive color
                 BufferedImage tinted = tintImage(raw, tint);
                 return new ImageIcon(tinted.getScaledInstance(16, 16, Image.SCALE_SMOOTH));
             }
@@ -292,7 +277,6 @@ public class SidebarPanel extends JPanel {
         return generateFallbackIcon(pageId, tint);
     }
 
-    /** Recolour a grayscale/RGBA icon to the given tint color. */
     private BufferedImage tintImage(BufferedImage src, Color tint) {
         int w = src.getWidth(), h = src.getHeight();
         BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -307,7 +291,6 @@ public class SidebarPanel extends JPanel {
         return out;
     }
 
-    /** Simple fallback icon drawn with Java2D when PNG isn't available. */
     private Icon generateFallbackIcon(String pageId, Color color) {
         BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();

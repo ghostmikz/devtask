@@ -5,6 +5,7 @@ import mongolup.client.ServerConnection;
 import mongolup.client.i18n.I18n;
 import mongolup.server.model.Project;
 import mongolup.server.model.Response;
+import mongolup.server.model.Sprint;
 import mongolup.client.ui.panels.*;
 
 import javax.swing.*;
@@ -76,6 +77,22 @@ public class MainFrame extends JFrame {
 
         main.add(contentArea, BorderLayout.CENTER);
         add(main, BorderLayout.CENTER);
+
+        // Reload active sprint badge whenever the current project changes
+        AppContext.getInstance().addProjectChangeListener(() -> {
+            Project p = AppContext.getInstance().getCurrentProject();
+            if (p == null) { topbar.setActiveSprint(null); return; }
+            new SwingWorker<Sprint, Void>() {
+                @Override protected Sprint doInBackground() throws Exception {
+                    var r = ServerConnection.getInstance().send("GET_ACTIVE_SPRINT", p.getProjectId());
+                    return r.isSuccess() && r.getData() instanceof Sprint s ? s : null;
+                }
+                @Override protected void done() {
+                    try { topbar.setActiveSprint(get()); }
+                    catch (Exception ignored) { topbar.setActiveSprint(null); }
+                }
+            }.execute();
+        });
 
         // Show kanban by default
         showPage("kanban");

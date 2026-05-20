@@ -506,7 +506,7 @@ public class ProjectsPanel extends JPanel {
                 var ar = ServerConnection.getInstance().send("GET_ALL_USERS", null);
                 List<User> members  = mr.isSuccess() ? (List<User>) mr.getData() : List.of();
                 List<User> allUsers = ar.isSuccess() ? (List<User>) ar.getData() : List.of();
-                return new Object[][]{ members.toArray(), allUsers.toArray() };
+                return new Object[][]{ members.toArray(new User[0]), allUsers.toArray(new User[0]) };
             }
             @Override protected void done() {
                 try {
