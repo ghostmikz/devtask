@@ -7,7 +7,7 @@ public class UpdateEvent implements Serializable {
 
     public enum Type {
         TASK_CREATED, TASK_UPDATED, TASK_STATUS_CHANGED,
-        TASK_ASSIGNED, COMMENT_ADDED, PROJECT_CREATED
+        TASK_ASSIGNED, TASK_DELETED, COMMENT_ADDED, PROJECT_CREATED
     }
 
     private Type type;

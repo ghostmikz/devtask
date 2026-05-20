@@ -128,18 +128,30 @@ public class ReportsPanel extends JPanel {
         statsGrid.setLayout(new GridLayout(1, 4, 12, 0));
         statsGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
         statsGrid.removeAll();
-        int total = rows.stream().mapToInt(r -> (int) r[1]).sum();
-        int done  = rows.stream()
+
+        // Extract overdue sentinel (first row added by server)
+        int overdue = 0;
+        List<Object[]> statusRows = new java.util.ArrayList<>();
+        for (Object[] r : rows) {
+            if ("__overdue__".equals(r[0])) overdue = (int) r[1];
+            else statusRows.add(r);
+        }
+
+        int total = statusRows.stream().mapToInt(r -> (int) r[1]).sum();
+        int done  = statusRows.stream()
                 .filter(r -> ((String) r[0]).toLowerCase().contains("дуусс") ||
                              ((String) r[0]).toLowerCase().contains("done"))
                 .mapToInt(r -> (int) r[1]).sum();
-        int overdue = 0; // would need more data for real overdue count
 
-        statsGrid.add(statCard(I18n.t("reports.total_tasks"), String.valueOf(total), "↑ 15%", SUCCESS));
-        statsGrid.add(statCard(I18n.t("reports.done"),        String.valueOf(done),  "↑ 35%", SUCCESS));
+        statsGrid.add(statCard(I18n.t("reports.total_tasks"), String.valueOf(total),
+                total > 0 ? "↑" : "", total > 0 ? SUCCESS : SEC));
+        statsGrid.add(statCard(I18n.t("reports.done"), String.valueOf(done),
+                done > 0 ? "↑ " + Math.round(100.0 * done / Math.max(1, total)) + "%" : "—", SUCCESS));
         statsGrid.add(statCard(I18n.t("reports.on_time"),
-                total > 0 ? Math.round(100.0 * done / total) + "%" : "—", "↑ 8%", SUCCESS));
-        statsGrid.add(statCard(I18n.t("reports.overdue"), String.valueOf(overdue), "", ERROR));
+                total > 0 ? Math.round(100.0 * (total - overdue) / total) + "%" : "—",
+                total > 0 ? "↑" : "", SUCCESS));
+        statsGrid.add(statCard(I18n.t("reports.overdue"), String.valueOf(overdue),
+                overdue > 0 ? "↑" : "✓", overdue > 0 ? ERROR : SUCCESS));
 
         statsGrid.revalidate();
         statsGrid.repaint();
@@ -168,10 +180,11 @@ public class ReportsPanel extends JPanel {
                 new EmptyBorder(16, 16, 16, 16)));
         chartsRow.add(barPanel);
 
-        // Pie / donut chart — by status
+        // Pie / donut chart — by status (skip sentinel row)
         DefaultPieDataset<String> pieDs = new DefaultPieDataset<>();
         for (Object[] row : rows) {
             String name = (String) row[0];
+            if ("__overdue__".equals(name)) continue;
             int    cnt  = (int)   row[1];
             if (cnt > 0) pieDs.setValue(name, cnt);
         }
@@ -181,10 +194,11 @@ public class ReportsPanel extends JPanel {
         PiePlot<?> plot = (PiePlot<?>) pie.getPlot();
         plot.setBackgroundPaint(CARD);
         plot.setOutlinePaint(BORDER);
-        // color each slice
+        // color each slice (skip sentinel)
         Color[] palette = {new Color(0xE8E8E5), BLUE, AMBER, SUCCESS};
         int ci = 0;
         for (Object[] row : rows) {
+            if ("__overdue__".equals(row[0])) continue;
             if ((int) row[1] > 0) plot.setSectionPaint((String) row[0], palette[ci++ % palette.length]);
         }
         ChartPanel piePanel = new ChartPanel(pie);

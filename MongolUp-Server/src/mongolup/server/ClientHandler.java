@@ -81,6 +81,7 @@ public class ClientHandler implements Runnable {
                 case "GET_TASKS"         -> handleGetTasks(req);
                 case "CREATE_TASK"       -> handleCreateTask(req);
                 case "UPDATE_TASK"       -> handleUpdateTask(req);
+                case "DELETE_TASK"       -> handleDeleteTask(req);
                 case "UPDATE_TASK_STATUS"-> handleUpdateTaskStatus(req);
                 case "GET_TASK_DETAIL"   -> handleGetTaskDetail(req);
                 case "GET_MY_TASKS"      -> handleGetMyTasks(req);
@@ -206,6 +207,21 @@ public class ClientHandler implements Runnable {
         if (ok) BroadcastService.getInstance().broadcast(
                 new UpdateEvent(UpdateEvent.Type.TASK_UPDATED, task.getProjectId(), task), this);
         return ok ? Response.ok(req.getRequestId(), task)
+                  : Response.fail(req.getRequestId(), "Task not found");
+    }
+
+    private Response handleDeleteTask(Request req) throws Exception {
+        requireAuth(req);
+        int[] ids = (int[]) req.getPayload(); // [taskId, projectId]
+        boolean ok = taskDAO.deleteTask(ids[0]);
+        if (ok) {
+            Task stub = new Task();
+            stub.setTaskId(ids[0]);
+            stub.setProjectId(ids[1]);
+            BroadcastService.getInstance().broadcast(
+                    new UpdateEvent(UpdateEvent.Type.TASK_DELETED, ids[1], stub), this);
+        }
+        return ok ? Response.ok(req.getRequestId(), null)
                   : Response.fail(req.getRequestId(), "Task not found");
     }
 

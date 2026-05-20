@@ -26,6 +26,7 @@ public class MainFrame extends JFrame {
     private ReportsPanel  reportsPanel;
     private ProjectsPanel projectsPanel;
     private ProfilePanel  profilePanel;
+    private SettingsPanel settingsPanel;
 
     public MainFrame() {
         setTitle(I18n.t("app.title"));
@@ -64,12 +65,14 @@ public class MainFrame extends JFrame {
         projectsPanel = new ProjectsPanel(this::showPage);
         projectsPanel.setOnProjectsChanged(this::loadProjects);
         profilePanel  = new ProfilePanel();
+        settingsPanel = new SettingsPanel();
 
         contentArea.add(kanbanPanel,   "kanban");
         contentArea.add(tasksPanel,    "tasks");
         contentArea.add(reportsPanel,  "reports");
         contentArea.add(projectsPanel, "projects");
         contentArea.add(profilePanel,  "profile");
+        contentArea.add(settingsPanel, "settings");
 
         main.add(contentArea, BorderLayout.CENTER);
         add(main, BorderLayout.CENTER);
@@ -81,11 +84,12 @@ public class MainFrame extends JFrame {
     public void showPage(String pageId) {
         cardLayout.show(contentArea, pageId);
         String label = switch (pageId) {
-            case "kanban"   -> I18n.t("nav.kanban");
-            case "tasks"    -> I18n.t("nav.mytasks");
-            case "reports"  -> I18n.t("nav.reports");
-            case "projects" -> I18n.t("nav.projects");
-            case "profile"  -> I18n.t("nav.profile");
+            case "kanban"    -> I18n.t("nav.kanban");
+            case "tasks"     -> I18n.t("nav.mytasks");
+            case "reports"   -> I18n.t("nav.reports");
+            case "projects"  -> I18n.t("nav.projects");
+            case "profile"   -> I18n.t("nav.profile");
+            case "settings"  -> I18n.t("nav.settings");
             default -> pageId;
         };
         topbar.setPage(pageId, label);

@@ -39,6 +39,7 @@ public class EventBus {
     public static final String TASK_CREATED       = "TASK_CREATED";
     public static final String TASK_UPDATED       = "TASK_UPDATED";
     public static final String TASK_STATUS_CHANGED= "TASK_STATUS_CHANGED";
+    public static final String TASK_DELETED       = "TASK_DELETED";
     public static final String COMMENT_ADDED      = "COMMENT_ADDED";
     public static final String PROJECT_CREATED    = "PROJECT_CREATED";
 }

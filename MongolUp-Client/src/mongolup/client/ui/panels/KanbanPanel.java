@@ -122,7 +122,7 @@ public class KanbanPanel extends JPanel {
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dlg = new JDialog(owner, I18n.t("task.new.title"),
                 Dialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(460, 420);
+        dlg.setSize(460, 480);
         dlg.setLocationRelativeTo(owner);
         dlg.setResizable(false);
 
@@ -167,6 +167,12 @@ public class KanbanPanel extends JPanel {
         prioBox.setBackground(new Color(0xFAFAF8));
         prioBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 
+        SpinnerNumberModel weightModel = new SpinnerNumberModel(3, 1, 13, 1);
+        JSpinner weightSpinner = new JSpinner(weightModel);
+        weightSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        weightSpinner.setBackground(new Color(0xFAFAF8));
+        ((JSpinner.DefaultEditor) weightSpinner.getEditor()).getTextField().setBackground(new Color(0xFAFAF8));
+
         String[] colNames = columns.stream()
                 .map(c -> c.getStatus().getName()).toArray(String[]::new);
         JComboBox<String> colBox = new JComboBox<>(colNames);
@@ -186,8 +192,10 @@ public class KanbanPanel extends JPanel {
         gc.gridy = 3; form.add(descScroll, gc);
         gc.gridy = 4; form.add(inputLabel(I18n.t("task.priority")), gc);
         gc.gridy = 5; form.add(prioBox, gc);
-        gc.gridy = 6; form.add(inputLabel(I18n.t("kanban.column")), gc);
-        gc.gridy = 7; form.add(colBox, gc);
+        gc.gridy = 6; form.add(inputLabel(I18n.t("task.points")), gc);
+        gc.gridy = 7; form.add(weightSpinner, gc);
+        gc.gridy = 8; form.add(inputLabel(I18n.t("kanban.column")), gc);
+        gc.gridy = 9; form.add(colBox, gc);
         root.add(form, BorderLayout.CENTER);
 
         // Buttons
@@ -213,7 +221,7 @@ public class KanbanPanel extends JPanel {
             t.setTitle(title);
             t.setDescription(descField.getText().trim());
             t.setPriority(prioBox.getSelectedIndex() + 1);
-            t.setWeight(3);
+            t.setWeight((Integer) weightSpinner.getValue());
             t.setStatusId(status.getStatusId());
             dlg.dispose();
             new SwingWorker<Task, Void>() {
@@ -355,6 +363,11 @@ public class KanbanPanel extends JPanel {
         });
 
         EventBus.subscribe(EventBus.TASK_UPDATED, data -> {
+            if (!loaded) return;
+            load();
+        });
+
+        EventBus.subscribe(EventBus.TASK_DELETED, data -> {
             if (!loaded) return;
             load();
         });

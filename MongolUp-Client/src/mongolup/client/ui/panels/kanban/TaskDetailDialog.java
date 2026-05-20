@@ -184,22 +184,40 @@ public class TaskDetailDialog extends JDialog {
         add(scroll, BorderLayout.CENTER);
 
         // ── Button bar ────────────────────────────────────────────────────────
-        JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        JPanel btnBar = new JPanel(new BorderLayout());
         btnBar.setBackground(BG);
         btnBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
 
+        // Delete button on the left
+        JButton delete = new JButton(I18n.t("btn.delete"));
+        delete.setForeground(new Color(0xA32D2D));
+        delete.setBackground(new Color(0xFEF2F2));
+        delete.setBorderPainted(false);
+        delete.setFocusPainted(false);
+        delete.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        delete.setBorder(new EmptyBorder(8, 16, 8, 16));
+        delete.addActionListener(e -> deleteTask());
+
+        JPanel leftBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        leftBtns.setBackground(BG);
+        leftBtns.add(delete);
+
+        // Cancel / Save on the right
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        rightBtns.setBackground(BG);
         JButton cancel = new JButton(I18n.t("btn.cancel"));
         cancel.addActionListener(e -> dispose());
-
         JButton save = new JButton(I18n.t("btn.save"));
         save.setBackground(ACCENT);
         save.setForeground(Color.WHITE);
         save.setBorderPainted(false);
         save.setFocusPainted(false);
         save.addActionListener(e -> saveTask());
+        rightBtns.add(cancel);
+        rightBtns.add(save);
 
-        btnBar.add(cancel);
-        btnBar.add(save);
+        btnBar.add(leftBtns, BorderLayout.WEST);
+        btnBar.add(rightBtns, BorderLayout.EAST);
         add(btnBar, BorderLayout.SOUTH);
     }
 
@@ -296,6 +314,29 @@ public class TaskDetailDialog extends JDialog {
     }
 
     // ── actions ───────────────────────────────────────────────────────────────
+
+    private void deleteTask() {
+        int choice = JOptionPane.showConfirmDialog(this,
+                "<html>Delete <b>" + escapeHtml(task.getTitle()) + "</b>?<br>" +
+                "This cannot be undone.</html>",
+                I18n.t("btn.delete"),
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+        if (choice != JOptionPane.YES_OPTION) return;
+
+        new SwingWorker<Boolean, Void>() {
+            @Override protected Boolean doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("DELETE_TASK",
+                        new int[]{task.getTaskId(), task.getProjectId()});
+                return r.isSuccess();
+            }
+            @Override protected void done() {
+                try {
+                    if (get()) dispose();
+                } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
 
     private void saveTask() {
         task.setTitle(titleField.getText().trim());

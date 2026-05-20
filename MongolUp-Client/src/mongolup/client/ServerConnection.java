@@ -116,6 +116,7 @@ public class ServerConnection {
             case TASK_UPDATED        -> EventBus.TASK_UPDATED;
             case TASK_STATUS_CHANGED -> EventBus.TASK_STATUS_CHANGED;
             case TASK_ASSIGNED       -> EventBus.TASK_UPDATED;
+            case TASK_DELETED        -> EventBus.TASK_DELETED;
             case COMMENT_ADDED       -> EventBus.COMMENT_ADDED;
             case PROJECT_CREATED     -> EventBus.PROJECT_CREATED;
         };

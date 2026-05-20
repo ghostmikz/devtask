@@ -138,6 +138,33 @@ public class TaskDAO {
         }
     }
 
+    public boolean deleteTask(int taskId) throws SQLException {
+        // Remove child rows first to avoid FK violations
+        try (Connection c = DatabaseConnection.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(
+                    "DELETE FROM task_assignments WHERE task_id = ?")) {
+                ps.setInt(1, taskId); ps.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement(
+                    "DELETE FROM task_labels WHERE task_id = ?")) {
+                ps.setInt(1, taskId); ps.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement(
+                    "DELETE FROM activity_logs WHERE task_id = ?")) {
+                ps.setInt(1, taskId); ps.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement(
+                    "DELETE FROM comments WHERE task_id = ?")) {
+                ps.setInt(1, taskId); ps.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement(
+                    "DELETE FROM tasks WHERE task_id = ?")) {
+                ps.setInt(1, taskId);
+                return ps.executeUpdate() > 0;
+            }
+        }
+    }
+
     public boolean removeAssignee(int taskId, int userId) throws SQLException {
         String sql = "DELETE FROM task_assignments WHERE task_id = ? AND user_id = ?";
         try (Connection c = DatabaseConnection.getConnection();
@@ -149,12 +176,30 @@ public class TaskDAO {
     }
 
     public List<Object[]> getReportData(int projectId) throws SQLException {
-        // returns rows: [statusName, count, color]
+        // Row format: [statusName, count, color]
+        // First row is a special "__overdue__" row with the real overdue count.
+        List<Object[]> rows = new ArrayList<>();
+
+        // Overdue count: due_date in the past, status not 'done'
+        String overdueSql =
+            "SELECT COUNT(*) FROM tasks t " +
+            "LEFT JOIN statuses s ON s.status_id = t.status_id " +
+            "WHERE t.project_id = ? AND t.due_date < NOW() " +
+            "AND (s.type IS NULL OR s.type != 'done')";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(overdueSql)) {
+            ps.setInt(1, projectId);
+            try (ResultSet rs = ps.executeQuery()) {
+                int overdue = rs.next() ? rs.getInt(1) : 0;
+                rows.add(new Object[]{"__overdue__", overdue, null});
+            }
+        }
+
+        // Status counts
         String sql =
             "SELECT s.name, COUNT(t.task_id) AS cnt, s.color " +
             "FROM statuses s LEFT JOIN tasks t ON t.status_id = s.status_id " +
             "WHERE s.project_id = ? GROUP BY s.status_id ORDER BY s.sort_order";
-        List<Object[]> rows = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, projectId);
