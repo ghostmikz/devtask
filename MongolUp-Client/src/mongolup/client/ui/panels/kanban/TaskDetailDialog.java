@@ -1,0 +1,430 @@
+package mongolup.client.ui.panels.kanban;
+
+import mongolup.client.AppContext;
+import mongolup.client.ServerConnection;
+import mongolup.client.i18n.I18n;
+import mongolup.server.model.Comment;
+import mongolup.server.model.Label;
+import mongolup.server.model.Task;
+import mongolup.server.model.TaskDetail;
+import mongolup.server.model.User;
+import mongolup.client.ui.components.AvatarLabel;
+import mongolup.client.ui.components.TagLabel;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+@SuppressWarnings("unchecked")
+public class TaskDetailDialog extends JDialog {
+
+    private static final Color BG       = new Color(0xF5F5F3);
+    private static final Color CARD     = Color.WHITE;
+    private static final Color BORDER   = new Color(0xE8E8E5);
+    private static final Color TEXT_PRI = new Color(0x1A1A18);
+    private static final Color TEXT_SEC = new Color(0x888780);
+    private static final Color ACCENT   = new Color(0x1A1A18);
+    private static final Color SUCCESS  = new Color(0x0F6E56);
+    private static final Color INPUT_BG = new Color(0xFAFAF8);
+
+    private final Task task;
+    private TaskDetail detail;
+
+    // edit fields
+    private JTextField titleField;
+    private JTextArea  descArea;
+    private JComboBox<String> priorityBox;
+    private JTextField dueDateField;
+    private JTextField weightField;
+
+    // sections
+    private JPanel assigneesPanel;
+    private JPanel labelsPanel;
+    private JPanel commentsPanel;
+    private JTextField commentInput;
+
+    public TaskDetailDialog(Frame parent, Task task) {
+        super(parent, I18n.t("task.title"), true);
+        this.task = task;
+        setSize(620, 720);
+        setLocationRelativeTo(parent);
+        setLayout(new BorderLayout());
+        getContentPane().setBackground(BG);
+        buildUI();
+        loadDetail();
+    }
+
+    private void buildUI() {
+        // Scrollable main content
+        JPanel content = new JPanel();
+        content.setBackground(BG);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // ── Title ────────────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new BorderLayout(0, 8));
+            p.setBackground(CARD);
+            JLabel lbl = fieldLabel(I18n.t("task.title"));
+            titleField = new JTextField(task.getTitle());
+            styleInput(titleField);
+            p.add(lbl, BorderLayout.NORTH);
+            p.add(titleField, BorderLayout.CENTER);
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(10));
+
+        // ── Description ──────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new BorderLayout(0, 8));
+            p.setBackground(CARD);
+            p.add(fieldLabel(I18n.t("task.description")), BorderLayout.NORTH);
+            descArea = new JTextArea(task.getDescription() != null ? task.getDescription() : "", 4, 0);
+            descArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            descArea.setBackground(INPUT_BG);
+            descArea.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER),
+                    new EmptyBorder(8, 10, 8, 10)));
+            descArea.setLineWrap(true);
+            descArea.setWrapStyleWord(true);
+            p.add(new JScrollPane(descArea), BorderLayout.CENTER);
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(10));
+
+        // ── Meta row ──────────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new GridLayout(1, 3, 12, 0));
+            p.setBackground(CARD);
+
+            priorityBox = new JComboBox<>(new String[]{"1 - " + I18n.t("priority.low"),
+                    "2 - " + I18n.t("priority.medium"),
+                    "3 - " + I18n.t("priority.high"),
+                    "4 - " + I18n.t("priority.urgent")});
+            priorityBox.setSelectedIndex(Math.max(0, task.getPriority() - 1));
+            priorityBox.setBackground(INPUT_BG);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            dueDateField = new JTextField(task.getDueDate() != null ? sdf.format(task.getDueDate()) : "");
+            styleInput(dueDateField);
+
+            weightField = new JTextField(String.valueOf(task.getWeight()));
+            styleInput(weightField);
+
+            p.add(fieldGroupSmall(I18n.t("task.priority"), priorityBox));
+            p.add(fieldGroupSmall(I18n.t("task.due_date"), dueDateField));
+            p.add(fieldGroupSmall(I18n.t("task.points"),   weightField));
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(10));
+
+        // ── Assignees ────────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new BorderLayout(0, 8));
+            p.setBackground(CARD);
+            p.add(fieldLabel(I18n.t("task.assignees")), BorderLayout.NORTH);
+            assigneesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+            assigneesPanel.setBackground(CARD);
+            p.add(assigneesPanel, BorderLayout.CENTER);
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(10));
+
+        // ── Labels ───────────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new BorderLayout(0, 8));
+            p.setBackground(CARD);
+            p.add(fieldLabel(I18n.t("task.labels")), BorderLayout.NORTH);
+            labelsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+            labelsPanel.setBackground(CARD);
+            p.add(labelsPanel, BorderLayout.CENTER);
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(10));
+
+        // ── Comments ─────────────────────────────────────────────────────────
+        content.add(sectionCard(() -> {
+            JPanel p = new JPanel(new BorderLayout(0, 8));
+            p.setBackground(CARD);
+            p.add(fieldLabel(I18n.t("task.comments")), BorderLayout.NORTH);
+            commentsPanel = new JPanel();
+            commentsPanel.setBackground(CARD);
+            commentsPanel.setLayout(new BoxLayout(commentsPanel, BoxLayout.Y_AXIS));
+            p.add(commentsPanel, BorderLayout.CENTER);
+
+            JPanel inputRow = new JPanel(new BorderLayout(8, 0));
+            inputRow.setBackground(CARD);
+            inputRow.setBorder(new EmptyBorder(8, 0, 0, 0));
+            commentInput = new JTextField();
+            commentInput.setBackground(INPUT_BG);
+            commentInput.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER),
+                    new EmptyBorder(6, 10, 6, 10)));
+            commentInput.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            JButton send = new JButton(I18n.t("task.send"));
+            send.setBackground(ACCENT);
+            send.setForeground(Color.WHITE);
+            send.setBorderPainted(false);
+            send.setFocusPainted(false);
+            send.addActionListener(e -> postComment());
+            commentInput.addActionListener(e -> postComment());
+            inputRow.add(commentInput, BorderLayout.CENTER);
+            inputRow.add(send, BorderLayout.EAST);
+            p.add(inputRow, BorderLayout.SOUTH);
+            return p;
+        }));
+        content.add(Box.createVerticalStrut(20));
+
+        JScrollPane scroll = new JScrollPane(content);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        add(scroll, BorderLayout.CENTER);
+
+        // ── Button bar ────────────────────────────────────────────────────────
+        JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        btnBar.setBackground(BG);
+        btnBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
+
+        JButton cancel = new JButton(I18n.t("btn.cancel"));
+        cancel.addActionListener(e -> dispose());
+
+        JButton save = new JButton(I18n.t("btn.save"));
+        save.setBackground(ACCENT);
+        save.setForeground(Color.WHITE);
+        save.setBorderPainted(false);
+        save.setFocusPainted(false);
+        save.addActionListener(e -> saveTask());
+
+        btnBar.add(cancel);
+        btnBar.add(save);
+        add(btnBar, BorderLayout.SOUTH);
+    }
+
+    // ── data loading ─────────────────────────────────────────────────────────
+
+    private void loadDetail() {
+        new SwingWorker<TaskDetail, Void>() {
+            @Override protected TaskDetail doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("GET_TASK_DETAIL", task.getTaskId());
+                return r.isSuccess() ? (TaskDetail) r.getData() : null;
+            }
+            @Override protected void done() {
+                try {
+                    detail = get();
+                    if (detail != null) {
+                        populateAssignees(detail.getAssignees());
+                        populateLabels(detail.getLabels());
+                        populateComments(detail.getComments());
+                    }
+                } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
+
+    private void populateAssignees(List<User> assignees) {
+        assigneesPanel.removeAll();
+        if (assignees != null) {
+            for (User u : assignees) {
+                Color av = avatarColor(u.getUserId());
+                AvatarLabel a = new AvatarLabel(u.getInitials(), av, 28);
+                a.setToolTipText(u.getFullName() != null ? u.getFullName() : u.getUsername());
+                assigneesPanel.add(a);
+            }
+        }
+        // Add user button
+        JButton addUser = new JButton("+");
+        addUser.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        addUser.setForeground(TEXT_SEC);
+        addUser.setBorderPainted(false);
+        addUser.setContentAreaFilled(false);
+        addUser.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        addUser.addActionListener(e -> showAssigneeDialog());
+        assigneesPanel.add(addUser);
+        assigneesPanel.revalidate();
+        assigneesPanel.repaint();
+    }
+
+    private void populateLabels(List<Label> labels) {
+        labelsPanel.removeAll();
+        if (labels != null) {
+            for (Label l : labels) {
+                Color bg  = parseHex(l.getColor(), new Color(0xE8E8E5));
+                Color fg  = darken(bg);
+                labelsPanel.add(new TagLabel(l.getName(), bg, fg));
+            }
+        }
+        labelsPanel.revalidate();
+        labelsPanel.repaint();
+    }
+
+    private void populateComments(List<Comment> comments) {
+        commentsPanel.removeAll();
+        if (comments != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm");
+            for (Comment cm : comments) {
+                JPanel row = new JPanel(new BorderLayout(8, 0));
+                row.setBackground(CARD);
+                row.setBorder(new EmptyBorder(6, 0, 6, 0));
+                Color av = avatarColor(cm.getUserId());
+                AvatarLabel avatar = new AvatarLabel(
+                        cm.getAuthorInitials() != null ? cm.getAuthorInitials() : "?", av, 26);
+                JPanel textBlock = new JPanel();
+                textBlock.setBackground(CARD);
+                textBlock.setLayout(new BoxLayout(textBlock, BoxLayout.Y_AXIS));
+                JLabel author = new JLabel(cm.getAuthorName() != null ? cm.getAuthorName() : "");
+                author.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                author.setForeground(TEXT_PRI);
+                JLabel body = new JLabel("<html>" + escapeHtml(cm.getContent()) + "</html>");
+                body.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                body.setForeground(TEXT_SEC);
+                JLabel time = new JLabel(cm.getCreatedAt() != null ? sdf.format(cm.getCreatedAt()) : "");
+                time.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                time.setForeground(TEXT_SEC);
+                textBlock.add(author);
+                textBlock.add(body);
+                textBlock.add(time);
+                row.add(avatar, BorderLayout.WEST);
+                row.add(textBlock, BorderLayout.CENTER);
+                commentsPanel.add(row);
+            }
+        }
+        commentsPanel.revalidate();
+        commentsPanel.repaint();
+    }
+
+    // ── actions ───────────────────────────────────────────────────────────────
+
+    private void saveTask() {
+        task.setTitle(titleField.getText().trim());
+        task.setDescription(descArea.getText().trim());
+        task.setPriority(priorityBox.getSelectedIndex() + 1);
+        try { task.setWeight(Integer.parseInt(weightField.getText().trim())); }
+        catch (NumberFormatException ignored) {}
+
+        new SwingWorker<Void, Void>() {
+            @Override protected Void doInBackground() throws Exception {
+                ServerConnection.getInstance().send("UPDATE_TASK", task);
+                return null;
+            }
+            @Override protected void done() { dispose(); }
+        }.execute();
+    }
+
+    private void postComment() {
+        String text = commentInput.getText().trim();
+        if (text.isEmpty()) return;
+        commentInput.setText("");
+        Comment cm = new Comment();
+        cm.setTaskId(task.getTaskId());
+        cm.setContent(text);
+        new SwingWorker<Comment, Void>() {
+            @Override protected Comment doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("ADD_COMMENT", cm);
+                return r.isSuccess() ? (Comment) r.getData() : null;
+            }
+            @Override protected void done() {
+                try {
+                    Comment saved = get();
+                    if (saved != null) populateComments(
+                            detail != null ? appendComment(detail.getComments(), saved)
+                                          : List.of(saved));
+                } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
+
+    private void showAssigneeDialog() {
+        new SwingWorker<List<User>, Void>() {
+            @Override protected List<User> doInBackground() throws Exception {
+                var r = ServerConnection.getInstance()
+                        .send("GET_USERS", task.getProjectId());
+                return r.isSuccess() ? (List<User>) r.getData() : List.of();
+            }
+            @Override protected void done() {
+                try {
+                    List<User> users = get();
+                    if (users.isEmpty()) { return; }
+                    User chosen = (User) JOptionPane.showInputDialog(
+                            TaskDetailDialog.this,
+                            I18n.t("task.assignees"),
+                            I18n.t("btn.add"),
+                            JOptionPane.PLAIN_MESSAGE, null,
+                            users.toArray(), users.get(0));
+                    if (chosen == null) return;
+                    ServerConnection.getInstance().send("ASSIGN_USER",
+                            new int[]{task.getTaskId(), chosen.getUserId()});
+                    loadDetail();
+                } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    private List<Comment> appendComment(List<Comment> existing, Comment cm) {
+        java.util.ArrayList<Comment> list = new java.util.ArrayList<>(
+                existing != null ? existing : List.of());
+        list.add(cm);
+        return list;
+    }
+
+    private JPanel sectionCard(java.util.function.Supplier<JPanel> content) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setBackground(CARD);
+        wrapper.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(14, 14, 14, 14)));
+        wrapper.setAlignmentX(LEFT_ALIGNMENT);
+        wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 500));
+        wrapper.add(content.get());
+        return wrapper;
+    }
+
+    private JLabel fieldLabel(String text) {
+        JLabel l = new JLabel(text.toUpperCase());
+        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setForeground(TEXT_SEC);
+        return l;
+    }
+
+    private void styleInput(JTextField tf) {
+        tf.setBackground(INPUT_BG);
+        tf.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(7, 10, 7, 10)));
+        tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+    }
+
+    private JPanel fieldGroupSmall(String label, JComponent input) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
+        p.setBackground(CARD);
+        p.add(fieldLabel(label), BorderLayout.NORTH);
+        p.add(input, BorderLayout.CENTER);
+        return p;
+    }
+
+    private Color avatarColor(int id) {
+        Color[] pal = {new Color(0x0F6E56), new Color(0x7C3AED),
+                       new Color(0x2563EB), new Color(0xD97706)};
+        return pal[Math.abs(id) % pal.length];
+    }
+
+    private Color parseHex(String hex, Color fallback) {
+        try { return hex != null ? Color.decode(hex) : fallback; }
+        catch (NumberFormatException e) { return fallback; }
+    }
+
+    private Color darken(Color c) {
+        return new Color(Math.max(0, c.getRed() - 60),
+                         Math.max(0, c.getGreen() - 60),
+                         Math.max(0, c.getBlue() - 60));
+    }
+
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+}
