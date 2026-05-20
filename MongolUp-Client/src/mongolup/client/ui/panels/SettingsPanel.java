@@ -34,7 +34,7 @@ public class SettingsPanel extends JPanel {
         wrapper.setBorder(new EmptyBorder(24, 24, 24, 24));
 
         JLabel title = new JLabel(I18n.t("nav.settings"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setFont(new Font("Arial", Font.BOLD, 20));
         title.setForeground(TEXT);
         title.setBorder(new EmptyBorder(0, 0, 20, 0));
         wrapper.add(title, BorderLayout.NORTH);
@@ -91,7 +91,7 @@ public class SettingsPanel extends JPanel {
     private JRadioButton langRadio(String label, String langCode, String current,
                                    ButtonGroup grp, JPanel parent) {
         JRadioButton rb = new JRadioButton(label, langCode.equals(current));
-        rb.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        rb.setFont(new Font("Arial", Font.PLAIN, 13));
         rb.setForeground(TEXT);
         rb.setBackground(CARD);
         rb.setFocusPainted(false);
@@ -110,20 +110,20 @@ public class SettingsPanel extends JPanel {
 
         ButtonGroup grp = new ButtonGroup();
         JRadioButton light = new JRadioButton(I18n.t("settings.theme.light"), true);
-        light.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        light.setFont(new Font("Arial", Font.PLAIN, 13));
         light.setForeground(TEXT);
         light.setBackground(CARD);
         light.setFocusPainted(false);
 
         JRadioButton dark = new JRadioButton(I18n.t("settings.theme.dark"));
-        dark.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        dark.setFont(new Font("Arial", Font.PLAIN, 13));
         dark.setForeground(SEC);
         dark.setBackground(CARD);
         dark.setFocusPainted(false);
         dark.setEnabled(false); // not yet implemented
 
         JLabel soon = new JLabel("  (" + I18n.t("settings.coming_soon") + ")");
-        soon.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        soon.setFont(new Font("Arial", Font.ITALIC, 11));
         soon.setForeground(SEC);
 
         grp.add(light);
@@ -154,10 +154,10 @@ public class SettingsPanel extends JPanel {
         row.setBackground(CARD);
         row.setAlignmentX(LEFT_ALIGNMENT);
         JLabel k = new JLabel(key + ":  ");
-        k.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        k.setFont(new Font("Arial", Font.BOLD, 12));
         k.setForeground(SEC);
         JLabel v = new JLabel(value);
-        v.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        v.setFont(new Font("Arial", Font.PLAIN, 12));
         v.setForeground(TEXT);
         row.add(k);
         row.add(v);
@@ -175,7 +175,7 @@ public class SettingsPanel extends JPanel {
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
 
         JLabel h = new JLabel(heading);
-        h.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        h.setFont(new Font("Arial", Font.BOLD, 13));
         h.setForeground(TEXT);
         h.setBorder(new EmptyBorder(0, 0, 4, 0));
 

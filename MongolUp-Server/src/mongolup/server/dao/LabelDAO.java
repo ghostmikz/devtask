@@ -10,12 +10,11 @@ import java.util.List;
 public class LabelDAO {
 
     public List<Label> getLabelsByProject(int projectId) throws SQLException {
-        String sql = "SELECT * FROM labels WHERE project_id = ? ORDER BY name";
         List<Label> list = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, projectId);
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement cs = c.prepareCall("{CALL sp_get_labels_by_project(?)}")) {
+            cs.setInt(1, projectId);
+            try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) list.add(mapLabel(rs));
             }
         }
@@ -23,14 +22,11 @@ public class LabelDAO {
     }
 
     public List<Label> getLabelsByTask(int taskId) throws SQLException {
-        String sql = "SELECT l.* FROM labels l " +
-                     "JOIN task_labels tl ON tl.label_id = l.label_id " +
-                     "WHERE tl.task_id = ?";
         List<Label> list = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, taskId);
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement cs = c.prepareCall("{CALL sp_get_labels_by_task(?)}")) {
+            cs.setInt(1, taskId);
+            try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) list.add(mapLabel(rs));
             }
         }
@@ -38,42 +34,39 @@ public class LabelDAO {
     }
 
     public boolean addLabelToTask(int taskId, int labelId) throws SQLException {
-        String sql = "INSERT IGNORE INTO task_labels (task_id, label_id) VALUES (?, ?)";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, taskId);
-            ps.setInt(2, labelId);
-            return ps.executeUpdate() > 0;
+             CallableStatement cs = c.prepareCall("{CALL sp_add_label_to_task(?,?)}")) {
+            cs.setInt(1, taskId);
+            cs.setInt(2, labelId);
+            cs.execute();
+            return true;
         }
     }
 
     public boolean removeLabelFromTask(int taskId, int labelId) throws SQLException {
-        String sql = "DELETE FROM task_labels WHERE task_id = ? AND label_id = ?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, taskId);
-            ps.setInt(2, labelId);
-            return ps.executeUpdate() > 0;
+             CallableStatement cs = c.prepareCall("{CALL sp_remove_label_from_task(?,?)}")) {
+            cs.setInt(1, taskId);
+            cs.setInt(2, labelId);
+            cs.execute();
+            return true;
         }
     }
 
     public Label createLabel(int projectId, String name, String color) throws SQLException {
-        String sql = "INSERT INTO labels (project_id, name, color) VALUES (?, ?, ?)";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, projectId);
-            ps.setString(2, name);
-            ps.setString(3, color);
-            ps.executeUpdate();
-            try (ResultSet gen = ps.getGeneratedKeys()) {
-                gen.next();
-                Label l = new Label();
-                l.setLabelId(gen.getInt(1));
-                l.setProjectId(projectId);
-                l.setName(name);
-                l.setColor(color);
-                return l;
-            }
+             CallableStatement cs = c.prepareCall("{CALL sp_create_label(?,?,?,?)}")) {
+            cs.setInt(1, projectId);
+            cs.setString(2, name);
+            cs.setString(3, color);
+            cs.registerOutParameter(4, Types.INTEGER);
+            cs.execute();
+            Label l = new Label();
+            l.setLabelId(cs.getInt(4));
+            l.setProjectId(projectId);
+            l.setName(name);
+            l.setColor(color);
+            return l;
         }
     }
 

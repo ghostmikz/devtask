@@ -643,6 +643,24 @@ BEGIN
     INSERT IGNORE INTO task_labels (task_id, label_id) VALUES (p_task_id, p_label_id);
 END$$
 
+DROP PROCEDURE IF EXISTS sp_remove_label_from_task$$
+CREATE PROCEDURE sp_remove_label_from_task(IN p_task_id INT, IN p_label_id INT)
+BEGIN
+    DELETE FROM task_labels WHERE task_id = p_task_id AND label_id = p_label_id;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_create_label$$
+CREATE PROCEDURE sp_create_label(
+    IN  p_project_id INT,
+    IN  p_name       VARCHAR(100),
+    IN  p_color      VARCHAR(20),
+    OUT p_label_id   INT
+)
+BEGIN
+    INSERT INTO labels (project_id, name, color) VALUES (p_project_id, p_name, p_color);
+    SET p_label_id = LAST_INSERT_ID();
+END$$
+
 -- └─ Label ─────────────────────────────────────────────────────────────────┘
 
 -- ┌─ Comment ───────────────────────────────────────────────────────────────┐

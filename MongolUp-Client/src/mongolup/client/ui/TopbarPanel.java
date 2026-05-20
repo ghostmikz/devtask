@@ -1,11 +1,13 @@
 package mongolup.client.ui;
 
 import mongolup.client.i18n.I18n;
+import mongolup.server.model.Sprint;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -51,23 +53,25 @@ public class TopbarPanel extends JPanel {
         left.setBackground(BG);
         JLabel proj = new JLabel("DevTask");
         proj.setForeground(TEXT_SEC);
-        proj.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        proj.setFont(new Font("Arial", Font.PLAIN, 12));
         JLabel sep = new JLabel("/");
         sep.setForeground(TEXT_SEC);
         breadcrumbCur = new JLabel(I18n.t("nav.kanban"));
-        breadcrumbCur.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        breadcrumbCur.setFont(new Font("Arial", Font.BOLD, 12));
         breadcrumbCur.setForeground(ACCENT);
 
-        sprintBadge = new JLabel(I18n.t("topbar.sprint") + " 2");
+        sprintBadge = new JLabel();
         sprintBadge.setBackground(SUCCESS_BG);
         sprintBadge.setForeground(SUCCESS_FG);
-        sprintBadge.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        sprintBadge.setFont(new Font("Arial", Font.BOLD, 11));
         sprintBadge.setBorder(new EmptyBorder(3, 10, 3, 10));
         sprintBadge.setOpaque(true);
+        sprintBadge.setVisible(false);   // hidden until a sprint is loaded
 
-        sprintDate = new JLabel("5-р сар 1 — 5-р сар 15, 2026");
+        sprintDate = new JLabel();
         sprintDate.setForeground(TEXT_SEC);
-        sprintDate.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        sprintDate.setFont(new Font("Arial", Font.PLAIN, 11));
+        sprintDate.setVisible(false);
 
         left.add(proj);
         left.add(sep);
@@ -89,7 +93,7 @@ public class TopbarPanel extends JPanel {
 
         // Language toggle
         langToggle = new JButton(I18n.getCurrentLang().equals("mn") ? "EN" : "MN");
-        langToggle.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        langToggle.setFont(new Font("Arial", Font.BOLD, 11));
         langToggle.setForeground(ACCENT);
         langToggle.setBackground(new Color(0xF5F5F3));
         langToggle.setBorder(BorderFactory.createCompoundBorder(
@@ -109,7 +113,7 @@ public class TopbarPanel extends JPanel {
         addButton = new JButton(I18n.t("topbar.add_task"));
         addButton.setBackground(ACCENT);
         addButton.setForeground(Color.WHITE);
-        addButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        addButton.setFont(new Font("Arial", Font.BOLD, 12));
         addButton.setBorderPainted(false);
         addButton.setFocusPainted(false);
         addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -138,8 +142,24 @@ public class TopbarPanel extends JPanel {
         };
     }
 
+    /** Called by MainFrame when the active sprint for the current project changes. */
+    public void setActiveSprint(Sprint sprint) {
+        if (sprint != null) {
+            sprintBadge.setText(I18n.t("topbar.sprint") + ": " + sprint.getName());
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM d");
+            String dateRange = (sprint.getStartDate() != null ? sdf.format(sprint.getStartDate()) : "")
+                    + " — "
+                    + (sprint.getEndDate() != null ? sdf.format(sprint.getEndDate()) : "");
+            sprintDate.setText(dateRange);
+            sprintBadge.setVisible(true);
+            sprintDate.setVisible(true);
+        } else {
+            sprintBadge.setVisible(false);
+            sprintDate.setVisible(false);
+        }
+    }
+
     private void refreshText() {
-        sprintBadge.setText(I18n.t("topbar.sprint") + " 2");
         addButton.setText(addBtnLabel(currentPage));
         langToggle.setText(I18n.getCurrentLang().equals("mn") ? "EN" : "MN");
         // Rebuild priority legend labels
@@ -167,10 +187,10 @@ public class TopbarPanel extends JPanel {
         p.setBackground(BG);
         JLabel dot = new JLabel("●");
         dot.setForeground(Color.decode(hex));
-        dot.setFont(new Font("Segoe UI", Font.PLAIN, 8));
+        dot.setFont(new Font("Arial", Font.PLAIN, 8));
         JLabel lbl = new JLabel(label);
         lbl.setForeground(TEXT_SEC);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lbl.setFont(new Font("Arial", Font.PLAIN, 11));
         p.add(dot);
         p.add(lbl);
         return p;

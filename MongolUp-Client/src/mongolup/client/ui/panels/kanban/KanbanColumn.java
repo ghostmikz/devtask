@@ -109,15 +109,15 @@ public class KanbanColumn extends JPanel implements DropTargetListener {
 
         // color dot
         JLabel dot = new JLabel("●");
-        dot.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        dot.setFont(new Font("Arial", Font.PLAIN, 10));
         dot.setForeground(parseHex(status.getColor()));
 
         JLabel name = new JLabel(status.getName());
-        name.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        name.setFont(new Font("Arial", Font.BOLD, 12));
         name.setForeground(TEXT);
 
         countLabel = new JLabel("0");
-        countLabel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        countLabel.setFont(new Font("Arial", Font.PLAIN, 10));
         countLabel.setForeground(SEC);
         countLabel.setBackground(Color.WHITE);
         countLabel.setOpaque(true);
@@ -134,7 +134,7 @@ public class KanbanColumn extends JPanel implements DropTargetListener {
 
         // Gear button for column management
         JLabel gear = new JLabel("⋯");
-        gear.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        gear.setFont(new Font("Arial", Font.PLAIN, 14));
         gear.setForeground(SEC);
         gear.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         gear.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -170,7 +170,7 @@ public class KanbanColumn extends JPanel implements DropTargetListener {
         addPanel.setBorder(new EmptyBorder(4, 0, 0, 0));
 
         JLabel addBtn = new JLabel(I18n.t("kanban.add_task"), SwingConstants.CENTER);
-        addBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        addBtn.setFont(new Font("Arial", Font.PLAIN, 12));
         addBtn.setForeground(SEC);
         addBtn.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createDashedBorder(BORDER, 4, 3),
@@ -196,7 +196,7 @@ public class KanbanColumn extends JPanel implements DropTargetListener {
         cardsPanel.removeAll();
         if (tasks.isEmpty()) {
             JLabel empty = new JLabel(I18n.t("kanban.no_tasks"), SwingConstants.CENTER);
-            empty.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            empty.setFont(new Font("Arial", Font.PLAIN, 11));
             empty.setForeground(SEC);
             empty.setAlignmentX(CENTER_ALIGNMENT);
             empty.setBorder(new EmptyBorder(20, 0, 20, 0));

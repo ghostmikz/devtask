@@ -68,9 +68,9 @@ public class LoginFrame extends JFrame {
         header.setBorder(new EmptyBorder(0, 0, 24, 0));
         JLabel dot = new JLabel("●");
         dot.setForeground(new Color(0x4ADE80));
-        dot.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        dot.setFont(new Font("Arial", Font.PLAIN, 14));
         JLabel logo = new JLabel("DevTask");
-        logo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        logo.setFont(new Font("Arial", Font.BOLD, 20));
         logo.setForeground(ACCENT);
         header.add(dot);
         header.add(logo);
@@ -112,7 +112,7 @@ public class LoginFrame extends JFrame {
 
         lError = new JLabel(" ");
         lError.setForeground(ERROR);
-        lError.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lError.setFont(new Font("Arial", Font.PLAIN, 11));
         lError.setAlignmentX(LEFT_ALIGNMENT);
         loginPanel.add(lError);
         loginPanel.add(Box.createVerticalStrut(6));
@@ -161,7 +161,7 @@ public class LoginFrame extends JFrame {
 
         rError = new JLabel(" ");
         rError.setForeground(ERROR);
-        rError.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        rError.setFont(new Font("Arial", Font.PLAIN, 11));
         rError.setAlignmentX(LEFT_ALIGNMENT);
         registerPanel.add(rError);
         registerPanel.add(Box.createVerticalStrut(6));
@@ -269,7 +269,7 @@ public class LoginFrame extends JFrame {
 
     private JLabel sectionTitle(String text) {
         JLabel l = new JLabel(text);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        l.setFont(new Font("Arial", Font.BOLD, 18));
         l.setForeground(ACCENT);
         l.setAlignmentX(LEFT_ALIGNMENT);
         return l;
@@ -286,7 +286,7 @@ public class LoginFrame extends JFrame {
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(8, 10, 8, 10)));
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        c.setFont(new Font("Arial", Font.PLAIN, 13));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         c.setAlignmentX(LEFT_ALIGNMENT);
     }
@@ -297,7 +297,7 @@ public class LoginFrame extends JFrame {
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setAlignmentX(LEFT_ALIGNMENT);
         JLabel lbl = new JLabel(label.toUpperCase());
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lbl.setFont(new Font("Arial", Font.BOLD, 10));
         lbl.setForeground(TEXT_SEC);
         lbl.setAlignmentX(LEFT_ALIGNMENT);
         p.add(lbl);
@@ -310,7 +310,7 @@ public class LoginFrame extends JFrame {
         JButton b = new JButton(text);
         b.setBackground(ACCENT);
         b.setForeground(Color.WHITE);
-        b.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        b.setFont(new Font("Arial", Font.BOLD, 13));
         b.setBorderPainted(false);
         b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -324,7 +324,7 @@ public class LoginFrame extends JFrame {
         b.setBorderPainted(false);
         b.setContentAreaFilled(false);
         b.setForeground(new Color(0x2563EB));
-        b.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        b.setFont(new Font("Arial", Font.PLAIN, 12));
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setAlignmentX(LEFT_ALIGNMENT);
         return b;

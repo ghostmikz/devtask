@@ -30,7 +30,7 @@ public class ToastManager {
             toast.setAlwaysOnTop(true);
 
             JLabel lbl = new JLabel(msg);
-            lbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lbl.setFont(new Font("Arial", Font.PLAIN, 13));
             lbl.setForeground(Color.WHITE);
             lbl.setBackground(bg);
             lbl.setOpaque(true);

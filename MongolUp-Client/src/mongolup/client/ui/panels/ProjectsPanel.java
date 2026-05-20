@@ -54,7 +54,7 @@ public class ProjectsPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(BG);
         JLabel title = new JLabel(I18n.t("projects.title"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setFont(new Font("Arial", Font.BOLD, 20));
         title.setForeground(TEXT);
         header.add(title, BorderLayout.WEST);
         wrapper.add(header, BorderLayout.NORTH);
@@ -101,7 +101,7 @@ public class ProjectsPanel extends JPanel {
 
         // Title
         JLabel title = new JLabel(I18n.t("projects.new"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        title.setFont(new Font("Arial", Font.BOLD, 16));
         title.setForeground(TEXT);
         title.setBorder(new EmptyBorder(0, 0, 18, 0));
         root.add(title, BorderLayout.NORTH);
@@ -119,7 +119,7 @@ public class ProjectsPanel extends JPanel {
         String[] colors = {"#0F6E56", "#2563EB", "#7C3AED", "#D97706", "#EF4444"};
         JComboBox<String> colorBox = new JComboBox<>(colors);
         colorBox.setBackground(new Color(0xFAFAF8));
-        colorBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        colorBox.setFont(new Font("Arial", Font.PLAIN, 13));
 
         gc.gridy = 0; form.add(fieldLabel(I18n.t("projects.new.name")), gc);
         gc.gridy = 1; form.add(nameField, gc);
@@ -141,7 +141,7 @@ public class ProjectsPanel extends JPanel {
         ok.setForeground(Color.WHITE);
         ok.setBorderPainted(false);
         ok.setFocusPainted(false);
-        ok.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        ok.setFont(new Font("Arial", Font.BOLD, 13));
         ok.addActionListener(e -> {
             String name = nameField.getText().trim();
             if (name.isEmpty()) { nameField.requestFocus(); return; }
@@ -176,7 +176,7 @@ public class ProjectsPanel extends JPanel {
 
     private JTextField styledField() {
         JTextField f = new JTextField();
-        f.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        f.setFont(new Font("Arial", Font.PLAIN, 13));
         f.setBackground(new Color(0xFAFAF8));
         f.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(0xE8E8E5)),
@@ -187,7 +187,7 @@ public class ProjectsPanel extends JPanel {
 
     private JLabel fieldLabel(String text) {
         JLabel l = new JLabel(text.toUpperCase());
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setFont(new Font("Arial", Font.BOLD, 10));
         l.setForeground(new Color(0x888780));
         l.setBorder(new EmptyBorder(0, 0, 3, 0));
         return l;
@@ -211,11 +211,11 @@ public class ProjectsPanel extends JPanel {
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
         inner.setBackground(CARD);
         JLabel plus = new JLabel("+");
-        plus.setFont(new Font("Segoe UI", Font.PLAIN, 32));
+        plus.setFont(new Font("Arial", Font.PLAIN, 32));
         plus.setForeground(SEC);
         plus.setAlignmentX(CENTER_ALIGNMENT);
         JLabel addLbl = new JLabel(I18n.t("projects.new"));
-        addLbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        addLbl.setFont(new Font("Arial", Font.PLAIN, 13));
         addLbl.setForeground(SEC);
         addLbl.setAlignmentX(CENTER_ALIGNMENT);
         inner.add(plus);
@@ -248,7 +248,7 @@ public class ProjectsPanel extends JPanel {
 
         Color projColor = parseHex(p.getColor(), SUCCESS);
         JLabel icon = new JLabel("⊞");
-        icon.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        icon.setFont(new Font("Arial", Font.PLAIN, 22));
         icon.setForeground(projColor);
         icon.setBackground(blend(projColor, Color.WHITE, 0.15f));
         icon.setOpaque(true);
@@ -257,7 +257,7 @@ public class ProjectsPanel extends JPanel {
         boolean done = p.getProgress() >= 100;
         JLabel badge = new JLabel(done ? I18n.t("projects.status.done")
                                        : I18n.t("projects.status.active"));
-        badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        badge.setFont(new Font("Arial", Font.BOLD, 10));
         badge.setForeground(done ? SUCCESS : new Color(0x0F6E56));
         badge.setBackground(done ? SUC_BG : SUC_BG);
         badge.setOpaque(true);
@@ -267,7 +267,7 @@ public class ProjectsPanel extends JPanel {
         User me = AppContext.getInstance().getCurrentUser();
         boolean isOwner = me != null && me.getUserId() == p.getOwnerId();
         JLabel menuBtn = new JLabel("⋯");
-        menuBtn.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        menuBtn.setFont(new Font("Arial", Font.PLAIN, 16));
         menuBtn.setForeground(SEC);
         menuBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         menuBtn.setVisible(isOwner);
@@ -324,7 +324,7 @@ public class ProjectsPanel extends JPanel {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 
         JLabel name = new JLabel(p.getName());
-        name.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        name.setFont(new Font("Arial", Font.BOLD, 14));
         name.setForeground(TEXT);
         name.setAlignmentX(LEFT_ALIGNMENT);
         body.add(name);
@@ -333,7 +333,7 @@ public class ProjectsPanel extends JPanel {
         if (p.getDescription() != null && !p.getDescription().isBlank()) {
             JLabel desc = new JLabel("<html><body style='width:180px;color:#888780'>"
                     + escapeHtml(p.getDescription()) + "</body></html>");
-            desc.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            desc.setFont(new Font("Arial", Font.PLAIN, 11));
             desc.setAlignmentX(LEFT_ALIGNMENT);
             body.add(desc);
             body.add(Box.createVerticalStrut(14));
@@ -343,10 +343,10 @@ public class ProjectsPanel extends JPanel {
         JPanel progRow = new JPanel(new BorderLayout());
         progRow.setBackground(CARD);
         JLabel progLbl = new JLabel(I18n.t("projects.progress"));
-        progLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        progLbl.setFont(new Font("Arial", Font.PLAIN, 11));
         progLbl.setForeground(SEC);
         JLabel progPct = new JLabel(Math.round(p.getProgress()) + "%");
-        progPct.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        progPct.setFont(new Font("Arial", Font.BOLD, 11));
         progPct.setForeground(TEXT);
         progRow.add(progLbl, BorderLayout.WEST);
         progRow.add(progPct, BorderLayout.EAST);
@@ -382,7 +382,7 @@ public class ProjectsPanel extends JPanel {
         }
         // Small "+" manage button
         JLabel manageBtn = new JLabel("＋");
-        manageBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        manageBtn.setFont(new Font("Arial", Font.PLAIN, 13));
         manageBtn.setForeground(SEC);
         manageBtn.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
@@ -401,7 +401,7 @@ public class ProjectsPanel extends JPanel {
         membersRow.add(manageBtn);
 
         JLabel taskCount = new JLabel(p.getTaskCount() + " " + I18n.t("projects.tasks"));
-        taskCount.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        taskCount.setFont(new Font("Arial", Font.PLAIN, 11));
         taskCount.setForeground(SEC);
 
         footer.add(membersRow, BorderLayout.WEST);
@@ -438,7 +438,7 @@ public class ProjectsPanel extends JPanel {
         root.setBorder(new EmptyBorder(24, 28, 20, 28));
 
         JLabel title = new JLabel(I18n.t("projects.manage_members"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        title.setFont(new Font("Arial", Font.BOLD, 16));
         title.setForeground(TEXT);
         title.setBorder(new EmptyBorder(0, 0, 16, 0));
         root.add(title, BorderLayout.NORTH);
@@ -462,14 +462,14 @@ public class ProjectsPanel extends JPanel {
         gc.insets = new Insets(0, 0, 0, 0);
 
         JLabel addLbl = new JLabel(I18n.t("projects.add_member").toUpperCase());
-        addLbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        addLbl.setFont(new Font("Arial", Font.BOLD, 10));
         addLbl.setForeground(SEC);
         addLbl.setBorder(new EmptyBorder(0, 0, 6, 0));
         gc.gridx = 0; gc.gridy = 0; gc.gridwidth = 2; gc.weightx = 1;
         addSection.add(addLbl, gc);
 
         JComboBox<User> userCombo = new JComboBox<>();
-        userCombo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        userCombo.setFont(new Font("Arial", Font.PLAIN, 13));
         userCombo.setBackground(new Color(0xFAFAF8));
         userCombo.setRenderer(new DefaultListCellRenderer() {
             @Override public Component getListCellRendererComponent(
@@ -491,7 +491,7 @@ public class ProjectsPanel extends JPanel {
         addBtn.setForeground(Color.WHITE);
         addBtn.setBorderPainted(false);
         addBtn.setFocusPainted(false);
-        addBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        addBtn.setFont(new Font("Arial", Font.BOLD, 12));
         addBtn.setPreferredSize(new Dimension(80, 34));
         gc.gridx = 1; gc.weightx = 0; gc.insets = new Insets(0, 0, 0, 0);
         addSection.add(addBtn, gc);
@@ -568,10 +568,10 @@ public class ProjectsPanel extends JPanel {
             namePane.setLayout(new BoxLayout(namePane, BoxLayout.Y_AXIS));
             JLabel name = new JLabel(u.getFullName() != null && !u.getFullName().isBlank()
                     ? u.getFullName() : u.getUsername());
-            name.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            name.setFont(new Font("Arial", Font.BOLD, 13));
             name.setForeground(TEXT);
             JLabel uname = new JLabel("@" + u.getUsername());
-            uname.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            uname.setFont(new Font("Arial", Font.PLAIN, 11));
             uname.setForeground(SEC);
             namePane.add(name);
             namePane.add(uname);
@@ -581,7 +581,7 @@ public class ProjectsPanel extends JPanel {
             // Owner badge or Remove button
             if (u.getUserId() == ownerId) {
                 JLabel ownerBadge = new JLabel("Owner");
-                ownerBadge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                ownerBadge.setFont(new Font("Arial", Font.BOLD, 10));
                 ownerBadge.setForeground(new Color(0x0F6E56));
                 ownerBadge.setBackground(new Color(0xE1F5EE));
                 ownerBadge.setOpaque(true);
@@ -591,7 +591,7 @@ public class ProjectsPanel extends JPanel {
                        (currentUser.getUserId() == ownerId ||
                         currentUser.getRole() != null && currentUser.getRole().equals("admin"))) {
                 JButton removeBtn = new JButton(I18n.t("btn.remove"));
-                removeBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                removeBtn.setFont(new Font("Arial", Font.PLAIN, 11));
                 removeBtn.setForeground(new Color(0xA32D2D));
                 removeBtn.setBackground(new Color(0xFEF2F2));
                 removeBtn.setBorderPainted(false);
@@ -631,7 +631,7 @@ public class ProjectsPanel extends JPanel {
         if (members.isEmpty()) {
             JLabel empty = new JLabel(I18n.t("projects.no_members"), SwingConstants.CENTER);
             empty.setForeground(SEC);
-            empty.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            empty.setFont(new Font("Arial", Font.PLAIN, 13));
             empty.setAlignmentX(CENTER_ALIGNMENT);
             empty.setBorder(new EmptyBorder(30, 0, 30, 0));
             listPanel.add(empty);

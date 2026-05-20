@@ -46,15 +46,15 @@ public class KanbanPanel extends JPanel {
             new EmptyBorder(0, 18, 0, 18)));
 
         projectDotLabel = new JLabel("●");
-        projectDotLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        projectDotLabel.setFont(new Font("Arial", Font.PLAIN, 11));
         projectDotLabel.setForeground(new Color(0x4ADE80));
 
         projectNameLabel = new JLabel(I18n.t("nav.kanban"));
-        projectNameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        projectNameLabel.setFont(new Font("Arial", Font.BOLD, 14));
         projectNameLabel.setForeground(TEXT);
 
         JLabel hint = new JLabel("— " + I18n.t("nav.kanban"));
-        hint.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        hint.setFont(new Font("Arial", Font.PLAIN, 12));
         hint.setForeground(TEXT_SEC);
 
         header.add(projectDotLabel);
@@ -133,10 +133,10 @@ public class KanbanPanel extends JPanel {
 
         // Header
         JLabel header = new JLabel(I18n.t("task.new.title"));
-        header.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        header.setFont(new Font("Arial", Font.BOLD, 16));
         header.setForeground(new Color(0x1A1A18));
         JLabel projHint = new JLabel("  " + project.getName());
-        projHint.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        projHint.setFont(new Font("Arial", Font.PLAIN, 12));
         projHint.setForeground(new Color(0x888780));
         JPanel headerRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         headerRow.setBackground(Color.WHITE);
@@ -155,7 +155,7 @@ public class KanbanPanel extends JPanel {
         JTextField titleField = styledInput();
         JTextArea descField = new JTextArea(3, 0);
         descField.setLineWrap(true); descField.setWrapStyleWord(true);
-        descField.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        descField.setFont(new Font("Arial", Font.PLAIN, 13));
         descField.setBackground(new Color(0xFAFAF8));
         descField.setBorder(new EmptyBorder(8, 10, 8, 10));
         JScrollPane descScroll = new JScrollPane(descField);
@@ -168,11 +168,11 @@ public class KanbanPanel extends JPanel {
         JComboBox<String> prioBox = new JComboBox<>(priorities);
         prioBox.setSelectedIndex(1);
         prioBox.setBackground(new Color(0xFAFAF8));
-        prioBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        prioBox.setFont(new Font("Arial", Font.PLAIN, 13));
 
         SpinnerNumberModel weightModel = new SpinnerNumberModel(3, 1, 13, 1);
         JSpinner weightSpinner = new JSpinner(weightModel);
-        weightSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        weightSpinner.setFont(new Font("Arial", Font.PLAIN, 13));
         weightSpinner.setBackground(new Color(0xFAFAF8));
         ((JSpinner.DefaultEditor) weightSpinner.getEditor()).getTextField().setBackground(new Color(0xFAFAF8));
 
@@ -185,11 +185,11 @@ public class KanbanPanel extends JPanel {
                 BorderFactory.createLineBorder(new Color(0xE8E8E5)),
                 new EmptyBorder(6, 8, 6, 8)));
         dueDateSpinner.setBorder(null);
-        dueDateSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        dueDateSpinner.setFont(new Font("Arial", Font.PLAIN, 13));
         // "No due date" checkbox
         JCheckBox noDueDate = new JCheckBox(I18n.t("task.no_due_date"), true);
         noDueDate.setBackground(Color.WHITE);
-        noDueDate.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        noDueDate.setFont(new Font("Arial", Font.PLAIN, 12));
         noDueDate.addActionListener(e -> dueDateSpinner.setEnabled(!noDueDate.isSelected()));
         dueDateSpinner.setEnabled(false);
 
@@ -197,7 +197,7 @@ public class KanbanPanel extends JPanel {
                 .map(c -> c.getStatus().getName()).toArray(String[]::new);
         JComboBox<String> colBox = new JComboBox<>(colNames);
         colBox.setBackground(new Color(0xFAFAF8));
-        colBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        colBox.setFont(new Font("Arial", Font.PLAIN, 13));
         if (preselectedStatusId != null) {
             for (int i = 0; i < columns.size(); i++) {
                 if (columns.get(i).getStatus().getStatusId() == preselectedStatusId) {
@@ -229,7 +229,7 @@ public class KanbanPanel extends JPanel {
 
         JLabel chooseFile = new JLabel(I18n.t("task.add_attachment"));
         chooseFile.setForeground(new Color(0x888780));
-        chooseFile.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        chooseFile.setFont(new Font("Arial", Font.PLAIN, 12));
         chooseFile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         chooseFile.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override public void mouseEntered(java.awt.event.MouseEvent e) { chooseFile.setForeground(new Color(0x1A1A18)); }
@@ -251,7 +251,7 @@ public class KanbanPanel extends JPanel {
                     a.setFileData(data);
                     pendingAttachments.add(a);
                     JLabel chip = new JLabel("📎 " + f.getName() + "  (" + a.getFileSizeDisplay() + ")");
-                    chip.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                    chip.setFont(new Font("Arial", Font.PLAIN, 11));
                     chip.setForeground(new Color(0x1A1A18));
                     attachChips.add(chip);
                     attachChips.revalidate(); attachChips.repaint();
@@ -291,7 +291,7 @@ public class KanbanPanel extends JPanel {
         ok.setForeground(Color.WHITE);
         ok.setBorderPainted(false);
         ok.setFocusPainted(false);
-        ok.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        ok.setFont(new Font("Arial", Font.BOLD, 13));
         ok.addActionListener(e -> {
             String title = titleField.getText().trim();
             if (title.isEmpty()) { titleField.requestFocus(); return; }
@@ -346,7 +346,7 @@ public class KanbanPanel extends JPanel {
 
     private JTextField styledInput() {
         JTextField f = new JTextField();
-        f.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        f.setFont(new Font("Arial", Font.PLAIN, 13));
         f.setBackground(new Color(0xFAFAF8));
         f.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(0xE8E8E5)),
@@ -357,7 +357,7 @@ public class KanbanPanel extends JPanel {
 
     private JLabel inputLabel(String text) {
         JLabel l = new JLabel(text.toUpperCase());
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setFont(new Font("Arial", Font.BOLD, 10));
         l.setForeground(new Color(0x888780));
         l.setBorder(new EmptyBorder(0, 0, 3, 0));
         return l;
@@ -461,7 +461,7 @@ public class KanbanPanel extends JPanel {
         addCol.setPreferredSize(new Dimension(180, 0));
 
         JLabel lbl = new JLabel(I18n.t("kanban.add_column"));
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lbl.setFont(new Font("Arial", Font.PLAIN, 13));
         lbl.setForeground(new Color(0x888780));
         lbl.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createDashedBorder(new Color(0xE8E8E5), 6, 4),

@@ -10,7 +10,7 @@ public class TagLabel extends JLabel {
         super(text);
         setOpaque(false);
         setForeground(fg);
-        setFont(new Font("Segoe UI", Font.BOLD, 10));
+        setFont(new Font("Arial", Font.BOLD, 10));
         setBorder(BorderFactory.createEmptyBorder(2, 7, 2, 7));
         setBackground(bg); // stored but painted manually
     }

@@ -51,7 +51,7 @@ public class ReportsPanel extends JPanel {
 
         // Header
         JLabel title = new JLabel(I18n.t("reports.title"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        title.setFont(new Font("Arial", Font.BOLD, 22));
         title.setForeground(TEXT);
         title.setBorder(new EmptyBorder(0, 0, 24, 0));
         wrapper.add(title, BorderLayout.NORTH);
@@ -96,7 +96,7 @@ public class ReportsPanel extends JPanel {
         contentPanel.removeAll();
         JLabel lbl = new JLabel(msg, SwingConstants.CENTER);
         lbl.setForeground(SEC);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lbl.setFont(new Font("Arial", Font.PLAIN, 14));
         lbl.setAlignmentX(CENTER_ALIGNMENT);
         contentPanel.add(Box.createVerticalStrut(80));
         contentPanel.add(lbl);
@@ -198,17 +198,17 @@ public class ReportsPanel extends JPanel {
         body.setBorder(new EmptyBorder(14, 18, 14, 18));
 
         JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lbl.setFont(new Font("Arial", Font.PLAIN, 11));
         lbl.setForeground(SEC);
         lbl.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel val = new JLabel(value);
-        val.setFont(new Font("Segoe UI", Font.BOLD, 30));
+        val.setFont(new Font("Arial", Font.BOLD, 30));
         val.setForeground(TEXT);
         val.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel subLbl = new JLabel(sub != null ? sub : " ");
-        subLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        subLbl.setFont(new Font("Arial", Font.PLAIN, 11));
         subLbl.setForeground(accent);
         subLbl.setAlignmentX(LEFT_ALIGNMENT);
 
@@ -233,7 +233,7 @@ public class ReportsPanel extends JPanel {
         card.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JLabel title = new JLabel(I18n.t("reports.by_status"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        title.setFont(new Font("Arial", Font.BOLD, 14));
         title.setForeground(TEXT);
         card.add(title, BorderLayout.NORTH);
 
@@ -310,7 +310,7 @@ public class ReportsPanel extends JPanel {
             dot.setPreferredSize(new Dimension(8, 8));
 
             JLabel nameLbl = new JLabel(name);
-            nameLbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            nameLbl.setFont(new Font("Arial", Font.PLAIN, 12));
             nameLbl.setForeground(TEXT);
 
             left.add(dot);
@@ -339,7 +339,7 @@ public class ReportsPanel extends JPanel {
             miniBar.setOpaque(false);
 
             JLabel pctLbl = new JLabel(cnt + "");
-            pctLbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            pctLbl.setFont(new Font("Arial", Font.BOLD, 11));
             pctLbl.setForeground(col);
             pctLbl.setPreferredSize(new Dimension(24, 18));
 
@@ -355,7 +355,7 @@ public class ReportsPanel extends JPanel {
         if (statusRows.isEmpty()) {
             JLabel empty = new JLabel(I18n.t("kanban.no_tasks"), SwingConstants.CENTER);
             empty.setForeground(SEC);
-            empty.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            empty.setFont(new Font("Arial", Font.PLAIN, 13));
             empty.setAlignmentX(CENTER_ALIGNMENT);
             inner.add(empty);
         }
@@ -375,7 +375,7 @@ public class ReportsPanel extends JPanel {
         card.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JLabel title = new JLabel(I18n.t("reports.done"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        title.setFont(new Font("Arial", Font.BOLD, 14));
         title.setForeground(TEXT);
         card.add(title, BorderLayout.NORTH);
 
@@ -427,7 +427,7 @@ public class ReportsPanel extends JPanel {
 
                 // Center: big percentage
                 g2.setColor(textColor);
-                Font big = new Font("Segoe UI", Font.BOLD, (int)(size * 0.22));
+                Font big = new Font("Arial", Font.BOLD, (int)(size * 0.22));
                 g2.setFont(big);
                 String pctStr = pct + "%";
                 FontMetrics fmB = g2.getFontMetrics(big);
@@ -438,7 +438,7 @@ public class ReportsPanel extends JPanel {
 
                 // Center: sub label
                 g2.setColor(secColor);
-                Font sub = new Font("Segoe UI", Font.PLAIN, (int)(size * 0.085));
+                Font sub = new Font("Arial", Font.PLAIN, (int)(size * 0.085));
                 g2.setFont(sub);
                 String subStr = done + " / " + total;
                 FontMetrics fmS = g2.getFontMetrics(sub);
@@ -471,12 +471,12 @@ public class ReportsPanel extends JPanel {
         p.setBorder(new EmptyBorder(8, 12, 8, 12));
 
         JLabel v = new JLabel(value);
-        v.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        v.setFont(new Font("Arial", Font.BOLD, 18));
         v.setForeground(valueColor);
         v.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel l = new JLabel(label);
-        l.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        l.setFont(new Font("Arial", Font.PLAIN, 10));
         l.setForeground(SEC);
         l.setAlignmentX(LEFT_ALIGNMENT);
 

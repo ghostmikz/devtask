@@ -88,7 +88,7 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
                 ? "<html><body style='width:160px'><s>" + escapeHtml(task.getTitle()) + "</s></body></html>"
                 : "<html><body style='width:160px'>"    + escapeHtml(task.getTitle()) + "</body></html>";
         JLabel title = new JLabel(titleHtml);
-        title.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        title.setFont(new Font("Arial", Font.PLAIN, 12));
         title.setForeground(task.isDone() ? TEXT_SEC : TEXT_PRI);
         titleRow.add(title);
         add(titleRow);
@@ -127,7 +127,7 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             }
             if (parts.length > 4) {
                 JLabel more = new JLabel("+" + (parts.length - 4));
-                more.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                more.setFont(new Font("Arial", Font.PLAIN, 10));
                 more.setForeground(TEXT_SEC);
                 avatarRow.add(more);
             }
@@ -144,9 +144,9 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
         pts.setBackground(getBackground());
         JLabel dot = new JLabel("●");
         dot.setForeground(Color.decode(task.getPriorityColor()));
-        dot.setFont(new Font("Segoe UI", Font.PLAIN, 9));
+        dot.setFont(new Font("Arial", Font.PLAIN, 9));
         JLabel wt = new JLabel(task.getWeight() + " " + I18n.t("kanban.points"));
-        wt.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        wt.setFont(new Font("Arial", Font.PLAIN, 11));
         wt.setForeground(TEXT_SEC);
         pts.add(dot);
         pts.add(wt);
@@ -157,7 +157,7 @@ public class TaskCard extends JPanel implements DragGestureListener, DragSourceL
             boolean overdue = !task.isDone() && task.getDueDate().before(new Date());
             String dateStr = new SimpleDateFormat("MM/dd").format(task.getDueDate());
             JLabel dueLbl = new JLabel(overdue ? "⚠ " + dateStr : dateStr);
-            dueLbl.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            dueLbl.setFont(new Font("Arial", Font.PLAIN, 10));
             dueLbl.setForeground(overdue ? new Color(0xA32D2D) : TEXT_SEC);
             footer.add(dueLbl, BorderLayout.EAST);
         }

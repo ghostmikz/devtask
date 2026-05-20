@@ -47,7 +47,7 @@ public class MyTasksPanel extends JPanel {
         top.setBorder(new EmptyBorder(0, 0, 14, 0));
 
         JLabel title = new JLabel(I18n.t("mytasks.title"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setFont(new Font("Arial", Font.BOLD, 20));
         title.setForeground(TEXT_PRI);
         top.add(title, BorderLayout.NORTH);
 
@@ -76,7 +76,7 @@ public class MyTasksPanel extends JPanel {
         String[] filters = {"all", "active", "done", "overdue"};
         for (String f : filters) {
             JToggleButton pill = new JToggleButton(filterLabel(f));
-            pill.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            pill.setFont(new Font("Arial", Font.PLAIN, 12));
             pill.setSelected(f.equals(activeFilter));
             stylePill(pill, f.equals(activeFilter));
             pill.addActionListener(e -> {
@@ -160,7 +160,7 @@ public class MyTasksPanel extends JPanel {
             empty.setPreferredSize(new Dimension(0, 200));
             JLabel lbl = new JLabel(I18n.t("mytasks.filter." + activeFilter) + " — 0");
             lbl.setForeground(TEXT_SEC);
-            lbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lbl.setFont(new Font("Arial", Font.PLAIN, 13));
             empty.add(lbl);
             listPanel.add(empty);
         }
@@ -171,7 +171,7 @@ public class MyTasksPanel extends JPanel {
 
     private void addSectionHeader(String text, Color bg, Color fg) {
         JLabel lbl = new JLabel("  " + text.toUpperCase());
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lbl.setFont(new Font("Arial", Font.BOLD, 10));
         lbl.setForeground(fg);
         lbl.setBackground(bg);
         lbl.setOpaque(true);
@@ -196,11 +196,11 @@ public class MyTasksPanel extends JPanel {
         left.setBackground(CARD);
 
         JLabel dot = new JLabel("●");
-        dot.setFont(new Font("Segoe UI", Font.PLAIN, 9));
+        dot.setFont(new Font("Arial", Font.PLAIN, 9));
         dot.setForeground(Color.decode(task.getPriorityColor()));
 
         JLabel name = new JLabel(task.getTitle());
-        name.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        name.setFont(new Font("Arial", Font.PLAIN, 13));
         name.setForeground(task.isDone() ? TEXT_SEC : TEXT_PRI);
         if (task.isDone()) {
             name.setText("<html><strike>" + escHtml(task.getTitle()) + "</strike></html>");
@@ -215,7 +215,7 @@ public class MyTasksPanel extends JPanel {
 
         if (task.getStatusName() != null) {
             JLabel badge = new JLabel(task.getStatusName());
-            badge.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            badge.setFont(new Font("Arial", Font.PLAIN, 11));
             badge.setForeground(TEXT_SEC);
             badge.setBackground(BG);
             badge.setOpaque(true);
@@ -227,7 +227,7 @@ public class MyTasksPanel extends JPanel {
             String dateStr = new SimpleDateFormat("MM/dd").format(task.getDueDate());
             if (overdue) dateStr += "  " + I18n.t("mytasks.overdue");
             JLabel due = new JLabel(dateStr);
-            due.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            due.setFont(new Font("Arial", Font.PLAIN, 11));
             due.setForeground(overdue ? ERROR_FG : TEXT_SEC);
             if (overdue) due.setFont(due.getFont().deriveFont(Font.BOLD));
             right.add(due);

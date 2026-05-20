@@ -68,9 +68,9 @@ public class SidebarPanel extends JPanel {
         logoRow.setMaximumSize(new Dimension(220, 52));
         JLabel dotL = new JLabel("●");
         dotL.setForeground(DOT_ONLINE);
-        dotL.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        dotL.setFont(new Font("Arial", Font.PLAIN, 12));
         JLabel logoText = new JLabel("DevTask");
-        logoText.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        logoText.setFont(new Font("Arial", Font.BOLD, 17));
         logoText.setForeground(TEXT_FULL);
         logoRow.add(dotL);
         logoRow.add(logoText);
@@ -144,7 +144,7 @@ public class SidebarPanel extends JPanel {
 
         JLabel textLbl = new JLabel(label);
         textLbl.setForeground(isActive ? TEXT_FULL : TEXT_DIM);
-        textLbl.setFont(new Font("Segoe UI", isActive ? Font.BOLD : Font.PLAIN, 13));
+        textLbl.setFont(new Font("Arial", isActive ? Font.BOLD : Font.PLAIN, 13));
 
         inner.add(iconLbl);
         inner.add(textLbl);
@@ -152,7 +152,7 @@ public class SidebarPanel extends JPanel {
         if (badgeColor != null) {
             JLabel badge = new JLabel("●");
             badge.setForeground(badgeColor);
-            badge.setFont(new Font("Segoe UI", Font.PLAIN, 8));
+            badge.setFont(new Font("Arial", Font.PLAIN, 8));
             inner.add(badge);
         }
 
@@ -190,11 +190,11 @@ public class SidebarPanel extends JPanel {
         JLabel dot = new JLabel("●");
         try { dot.setForeground(Color.decode(p.getColor() != null ? p.getColor() : "#888888")); }
         catch (Exception ex) { dot.setForeground(TEXT_DIM); }
-        dot.setFont(new Font("Segoe UI", Font.PLAIN, 9));
+        dot.setFont(new Font("Arial", Font.PLAIN, 9));
 
         JLabel name = new JLabel(p.getName());
         name.setForeground(TEXT_DIM);
-        name.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        name.setFont(new Font("Arial", Font.PLAIN, 12));
 
         row.add(dot);
         row.add(name);
@@ -222,7 +222,7 @@ public class SidebarPanel extends JPanel {
             if (inner != null) inner.setBackground(act ? ITEM_ACT : BG);
             if (lbl   != null) {
                 lbl.setForeground(act ? TEXT_FULL : TEXT_DIM);
-                lbl.setFont(new Font("Segoe UI", act ? Font.BOLD : Font.PLAIN, 13));
+                lbl.setFont(new Font("Arial", act ? Font.BOLD : Font.PLAIN, 13));
             }
             if (ico != null && pid != null) {
                 ico.setIcon(loadIcon(pid, act ? TEXT_FULL : TEXT_DIM));
@@ -250,7 +250,7 @@ public class SidebarPanel extends JPanel {
         addRow.setAlignmentX(LEFT_ALIGNMENT);
         JLabel addLbl = new JLabel("+ " + I18n.t("nav.add_member"));
         addLbl.setForeground(TEXT_DIM);
-        addLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        addLbl.setFont(new Font("Arial", Font.PLAIN, 11));
         addLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addLbl.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override public void mouseEntered(java.awt.event.MouseEvent e) { addLbl.setForeground(TEXT_FULL); }
@@ -343,7 +343,7 @@ public class SidebarPanel extends JPanel {
                 u.getInitials() != null ? u.getInitials() : "?", aColor, 26);
         JLabel name = new JLabel(u.getFullName() != null ? u.getFullName() : u.getUsername());
         name.setForeground(TEXT_DIM);
-        name.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        name.setFont(new Font("Arial", Font.PLAIN, 12));
         row.add(av);
         row.add(name);
         add(row);
@@ -352,7 +352,7 @@ public class SidebarPanel extends JPanel {
     private void addSection(String text) {
         JLabel lbl = new JLabel(text.toUpperCase());
         lbl.setForeground(SECTION);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lbl.setFont(new Font("Arial", Font.BOLD, 10));
         lbl.setBorder(new EmptyBorder(10, 16, 4, 14));
         lbl.setAlignmentX(LEFT_ALIGNMENT);
         lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));

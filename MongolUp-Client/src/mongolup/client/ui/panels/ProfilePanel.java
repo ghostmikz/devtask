@@ -50,10 +50,10 @@ public class ProfilePanel extends JPanel {
         header.setBackground(BG);
         header.setBorder(new EmptyBorder(0, 0, 18, 0));
         JLabel title = new JLabel(I18n.t("profile.title"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setFont(new Font("Arial", Font.BOLD, 20));
         title.setForeground(TEXT);
         JLabel subtitle = new JLabel(I18n.t("profile.subtitle"));
-        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitle.setFont(new Font("Arial", Font.PLAIN, 12));
         subtitle.setForeground(SEC);
         header.add(title, BorderLayout.NORTH);
         header.add(subtitle, BorderLayout.SOUTH);
@@ -114,14 +114,14 @@ public class ProfilePanel extends JPanel {
         card.add(Box.createVerticalStrut(14));
 
         nameLabel = new JLabel(u != null && u.getFullName() != null ? u.getFullName() : "");
-        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 19));
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 19));
         nameLabel.setForeground(TEXT);
         nameLabel.setAlignmentX(CENTER_ALIGNMENT);
         card.add(nameLabel);
         card.add(Box.createVerticalStrut(4));
 
         JLabel role = new JLabel("Lead Developer · DevTask");
-        role.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        role.setFont(new Font("Arial", Font.PLAIN, 12));
         role.setForeground(SEC);
         role.setAlignmentX(CENTER_ALIGNMENT);
         card.add(role);
@@ -321,11 +321,11 @@ public class ProfilePanel extends JPanel {
                 new EmptyBorder(10, 8, 10, 8)));
         p.setPreferredSize(new Dimension(70, 90));
         JLabel v = new JLabel(val, SwingConstants.CENTER);
-        v.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        v.setFont(new Font("Arial", Font.BOLD, 22));
         v.setForeground(TEXT);
         v.setAlignmentX(CENTER_ALIGNMENT);
         JLabel l = new JLabel(label, SwingConstants.CENTER);
-        l.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        l.setFont(new Font("Arial", Font.PLAIN, 10));
         l.setForeground(SEC);
         l.setAlignmentX(CENTER_ALIGNMENT);
         l.setBorder(new EmptyBorder(4, 0, 0, 0));
@@ -336,7 +336,7 @@ public class ProfilePanel extends JPanel {
 
     private JLabel sectionTitle(String text) {
         JLabel l = new JLabel(text);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        l.setFont(new Font("Arial", Font.BOLD, 14));
         l.setForeground(TEXT);
         l.setAlignmentX(LEFT_ALIGNMENT);
         l.setBorder(BorderFactory.createCompoundBorder(
@@ -357,7 +357,7 @@ public class ProfilePanel extends JPanel {
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(8, 10, 8, 10)));
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        c.setFont(new Font("Arial", Font.PLAIN, 13));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         c.setAlignmentX(LEFT_ALIGNMENT);
     }
@@ -368,7 +368,7 @@ public class ProfilePanel extends JPanel {
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setAlignmentX(LEFT_ALIGNMENT);
         JLabel lbl = new JLabel(label.toUpperCase());
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lbl.setFont(new Font("Arial", Font.BOLD, 10));
         lbl.setForeground(SEC);
         lbl.setAlignmentX(LEFT_ALIGNMENT);
         p.add(lbl);
@@ -391,7 +391,7 @@ public class ProfilePanel extends JPanel {
         JButton b = new JButton(text);
         b.setBackground(ACCENT);
         b.setForeground(Color.WHITE);
-        b.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        b.setFont(new Font("Arial", Font.BOLD, 12));
         b.setBorderPainted(false);
         b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -403,7 +403,7 @@ public class ProfilePanel extends JPanel {
         JButton b = new JButton(text);
         b.setBackground(CARD);
         b.setForeground(TEXT);
-        b.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        b.setFont(new Font("Arial", Font.PLAIN, 12));
         b.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(7, 13, 7, 13)));

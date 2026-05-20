@@ -90,7 +90,7 @@ public class TaskDetailDialog extends JDialog {
             p.setBackground(CARD);
             p.add(fieldLabel(I18n.t("task.description")), BorderLayout.NORTH);
             descArea = new JTextArea(task.getDescription() != null ? task.getDescription() : "", 4, 0);
-            descArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            descArea.setFont(new Font("Arial", Font.PLAIN, 13));
             descArea.setBackground(INPUT_BG);
             descArea.setBorder(new EmptyBorder(8, 10, 8, 10));
             descArea.setLineWrap(true);
@@ -131,7 +131,7 @@ public class TaskDetailDialog extends JDialog {
             // "No due date" checkbox stacked below spinner — wrapped so grid heights stay sane
             noDueDateBox = new JCheckBox(I18n.t("task.no_due_date"), task.getDueDate() == null);
             noDueDateBox.setBackground(CARD);
-            noDueDateBox.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            noDueDateBox.setFont(new Font("Arial", Font.PLAIN, 10));
             noDueDateBox.addActionListener(e -> dueDateSpinner.setEnabled(!noDueDateBox.isSelected()));
             dueDateSpinner.setEnabled(!noDueDateBox.isSelected());
 
@@ -160,7 +160,7 @@ public class TaskDetailDialog extends JDialog {
             hdr.setBackground(CARD);
             hdr.add(fieldLabel(I18n.t("task.assignees")), BorderLayout.WEST);
             JButton addBtn = new JButton("+ " + I18n.t("btn.assign"));
-            addBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            addBtn.setFont(new Font("Arial", Font.PLAIN, 11));
             addBtn.setForeground(SUCCESS);
             addBtn.setBackground(CARD);
             addBtn.setBorderPainted(false);
@@ -174,7 +174,7 @@ public class TaskDetailDialog extends JDialog {
             assigneesPanel.setBackground(CARD);
             // placeholder shown until server responds
             JLabel placeholder = new JLabel(I18n.t("task.no_assignees"));
-            placeholder.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+            placeholder.setFont(new Font("Arial", Font.ITALIC, 12));
             placeholder.setForeground(TEXT_SEC);
             assigneesPanel.add(placeholder);
             p.add(assigneesPanel, BorderLayout.CENTER);
@@ -186,9 +186,27 @@ public class TaskDetailDialog extends JDialog {
         content.add(sectionCard(() -> {
             JPanel p = new JPanel(new BorderLayout(0, 8));
             p.setBackground(CARD);
-            p.add(fieldLabel(I18n.t("task.labels")), BorderLayout.NORTH);
-            labelsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+            JPanel hdr = new JPanel(new BorderLayout());
+            hdr.setBackground(CARD);
+            hdr.add(fieldLabel(I18n.t("task.labels")), BorderLayout.WEST);
+            JButton addLblBtn = new JButton("+ " + I18n.t("btn.add_label"));
+            addLblBtn.setFont(new Font("Arial", Font.PLAIN, 11));
+            addLblBtn.setForeground(SUCCESS);
+            addLblBtn.setBackground(CARD);
+            addLblBtn.setBorderPainted(false);
+            addLblBtn.setContentAreaFilled(false);
+            addLblBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addLblBtn.addActionListener(e -> showLabelDialog());
+            hdr.add(addLblBtn, BorderLayout.EAST);
+            p.add(hdr, BorderLayout.NORTH);
+
+            labelsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 4));
             labelsPanel.setBackground(CARD);
+            JLabel ph = new JLabel(I18n.t("task.no_labels"));
+            ph.setFont(new Font("Arial", Font.ITALIC, 12));
+            ph.setForeground(TEXT_SEC);
+            labelsPanel.add(ph);
             p.add(labelsPanel, BorderLayout.CENTER);
             return p;
         }));
@@ -225,7 +243,7 @@ public class TaskDetailDialog extends JDialog {
             commentInput.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(BORDER),
                     new EmptyBorder(6, 10, 6, 10)));
-            commentInput.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            commentInput.setFont(new Font("Arial", Font.PLAIN, 12));
             JButton send = new JButton(I18n.t("task.send"));
             send.setBackground(ACCENT);
             send.setForeground(Color.WHITE);
@@ -256,7 +274,7 @@ public class TaskDetailDialog extends JDialog {
         delete.setBackground(new Color(0xFEF2F2));
         delete.setBorderPainted(false);
         delete.setFocusPainted(false);
-        delete.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        delete.setFont(new Font("Arial", Font.PLAIN, 12));
         delete.setBorder(new EmptyBorder(8, 16, 8, 16));
         delete.addActionListener(e -> deleteTask());
 
@@ -311,7 +329,7 @@ public class TaskDetailDialog extends JDialog {
                         assigneesPanel.removeAll();
                         JLabel err = new JLabel("Load error: " + e.getMessage());
                         err.setForeground(new Color(0xA32D2D));
-                        err.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                        err.setFont(new Font("Arial", Font.PLAIN, 11));
                         assigneesPanel.add(err);
                         assigneesPanel.revalidate();
                     }
@@ -353,7 +371,7 @@ public class TaskDetailDialog extends JDialog {
             }
         } else {
             JLabel empty = new JLabel(I18n.t("task.no_assignees"));
-            empty.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+            empty.setFont(new Font("Arial", Font.ITALIC, 12));
             empty.setForeground(TEXT_SEC);
             assigneesPanel.add(empty);
         }
@@ -374,14 +392,14 @@ public class TaskDetailDialog extends JDialog {
                 chip.setAlignmentX(LEFT_ALIGNMENT);
                 JLabel nameLbl = new JLabel("📎 " + a.getFilename()
                         + "  (" + a.getFileSizeDisplay() + ")");
-                nameLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                nameLbl.setFont(new Font("Arial", Font.PLAIN, 11));
                 nameLbl.setForeground(TEXT_PRI);
                 nameLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 nameLbl.addMouseListener(new MouseAdapter() {
                     @Override public void mouseClicked(MouseEvent e) { downloadAttachment(a); }
                 });
                 JLabel del = new JLabel(" ✕");
-                del.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                del.setFont(new Font("Arial", Font.PLAIN, 10));
                 del.setForeground(TEXT_SEC);
                 del.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 del.addMouseListener(new MouseAdapter() {
@@ -406,7 +424,7 @@ public class TaskDetailDialog extends JDialog {
         }
         // Add-file link
         JLabel addFile = new JLabel(I18n.t("task.add_attachment"));
-        addFile.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        addFile.setFont(new Font("Arial", Font.PLAIN, 12));
         addFile.setForeground(TEXT_SEC);
         addFile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addFile.setAlignmentX(LEFT_ALIGNMENT);
@@ -479,15 +497,147 @@ public class TaskDetailDialog extends JDialog {
 
     private void populateLabels(List<Label> labels) {
         labelsPanel.removeAll();
-        if (labels != null) {
+        boolean hasAny = labels != null && !labels.isEmpty();
+        if (hasAny) {
             for (Label l : labels) {
-                Color bg  = parseHex(l.getColor(), new Color(0xE8E8E5));
-                Color fg  = darken(bg);
-                labelsPanel.add(new TagLabel(l.getName(), bg, fg));
+                Color bg = parseHex(l.getColor(), new Color(0xE8E8E5));
+                Color fg = darken(bg);
+
+                // chip = tag + "✕" remove button
+                JPanel chip = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
+                chip.setBackground(bg);
+                chip.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 4));
+                JLabel tag = new JLabel(l.getName());
+                tag.setFont(new Font("Arial", Font.BOLD, 11));
+                tag.setForeground(fg);
+                JLabel rm = new JLabel("✕");
+                rm.setFont(new Font("Arial", Font.PLAIN, 10));
+                rm.setForeground(fg);
+                rm.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                rm.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) {
+                        new SwingWorker<Void, Void>() {
+                            @Override protected Void doInBackground() throws Exception {
+                                ServerConnection.getInstance().send("REMOVE_LABEL_FROM_TASK",
+                                        new int[]{task.getTaskId(), l.getLabelId()});
+                                return null;
+                            }
+                            @Override protected void done() { loadDetail(); }
+                        }.execute();
+                    }
+                });
+                chip.add(tag);
+                chip.add(rm);
+                labelsPanel.add(chip);
             }
+        } else {
+            JLabel empty = new JLabel(I18n.t("task.no_labels"));
+            empty.setFont(new Font("Arial", Font.ITALIC, 12));
+            empty.setForeground(TEXT_SEC);
+            labelsPanel.add(empty);
         }
         labelsPanel.revalidate();
         labelsPanel.repaint();
+    }
+
+    private void showLabelDialog() {
+        int projectId = task.getProjectId();
+        new SwingWorker<List<Label>, Void>() {
+            @Override protected List<Label> doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("GET_LABELS", projectId);
+                return r.isSuccess() ? (List<Label>) r.getData() : List.of();
+            }
+            @Override protected void done() {
+                try {
+                    List<Label> all = get();
+                    // filter out already-applied labels
+                    List<Label> applied = (detail != null && detail.getLabels() != null)
+                            ? detail.getLabels() : List.of();
+                    List<Label> available = all.stream()
+                            .filter(l -> applied.stream().noneMatch(a -> a.getLabelId() == l.getLabelId()))
+                            .toList();
+                    if (available.isEmpty()) {
+                        // no project labels exist yet — offer to create one
+                        showCreateLabelDialog();
+                    } else {
+                        // let user pick from existing, or create a new one
+                        String[] names = available.stream().map(Label::getName).toArray(String[]::new);
+                        String[] opts  = new String[names.length + 1];
+                        System.arraycopy(names, 0, opts, 0, names.length);
+                        opts[names.length] = "+ " + I18n.t("task.create_label");
+
+                        String chosen = (String) JOptionPane.showInputDialog(
+                                TaskDetailDialog.this, I18n.t("task.labels"),
+                                I18n.t("btn.add_label"),
+                                JOptionPane.PLAIN_MESSAGE, null, opts, opts[0]);
+                        if (chosen == null) return;
+                        if (chosen.startsWith("+ ")) { showCreateLabelDialog(); return; }
+
+                        for (int i = 0; i < names.length; i++) {
+                            if (names[i].equals(chosen)) {
+                                final int lid = available.get(i).getLabelId();
+                                new SwingWorker<Void, Void>() {
+                                    @Override protected Void doInBackground() throws Exception {
+                                        ServerConnection.getInstance().send("ADD_LABEL_TO_TASK",
+                                                new int[]{task.getTaskId(), lid});
+                                        return null;
+                                    }
+                                    @Override protected void done() { loadDetail(); }
+                                }.execute();
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }.execute();
+    }
+
+    private void showCreateLabelDialog() {
+        // preset palette
+        String[] colorHex   = {"#3B82F6","#10B981","#F59E0B","#EF4444","#8B5CF6","#EC4899","#6B7280"};
+        String[] colorNames = {"Blue","Green","Yellow","Red","Purple","Pink","Gray"};
+
+        JTextField nameField = new JTextField(14);
+        JComboBox<String> colorBox = new JComboBox<>(colorNames);
+        JPanel form = new JPanel(new GridLayout(0, 2, 8, 8));
+        form.add(new JLabel(I18n.t("task.label_name") + ":"));
+        form.add(nameField);
+        form.add(new JLabel(I18n.t("task.label_color") + ":"));
+        form.add(colorBox);
+
+        int res = JOptionPane.showConfirmDialog(this, form,
+                I18n.t("task.create_label"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (res != JOptionPane.OK_OPTION) return;
+        String name = nameField.getText().trim();
+        if (name.isEmpty()) return;
+        String color = colorHex[colorBox.getSelectedIndex()];
+
+        Label newLabel = new Label();
+        newLabel.setProjectId(task.getProjectId());
+        newLabel.setName(name);
+        newLabel.setColor(color);
+
+        new SwingWorker<Label, Void>() {
+            @Override protected Label doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("CREATE_LABEL", newLabel);
+                return r.isSuccess() ? (Label) r.getData() : null;
+            }
+            @Override protected void done() {
+                try {
+                    Label created = get();
+                    if (created == null) return;
+                    new SwingWorker<Void, Void>() {
+                        @Override protected Void doInBackground() throws Exception {
+                            ServerConnection.getInstance().send("ADD_LABEL_TO_TASK",
+                                    new int[]{task.getTaskId(), created.getLabelId()});
+                            return null;
+                        }
+                        @Override protected void done() { loadDetail(); }
+                    }.execute();
+                } catch (Exception ignored) {}
+            }
+        }.execute();
     }
 
     private void populateComments(List<Comment> comments) {
@@ -505,13 +655,13 @@ public class TaskDetailDialog extends JDialog {
                 textBlock.setBackground(CARD);
                 textBlock.setLayout(new BoxLayout(textBlock, BoxLayout.Y_AXIS));
                 JLabel author = new JLabel(cm.getAuthorName() != null ? cm.getAuthorName() : "");
-                author.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                author.setFont(new Font("Arial", Font.BOLD, 11));
                 author.setForeground(TEXT_PRI);
                 JLabel body = new JLabel("<html>" + escapeHtml(cm.getContent()) + "</html>");
-                body.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                body.setFont(new Font("Arial", Font.PLAIN, 12));
                 body.setForeground(TEXT_SEC);
                 JLabel time = new JLabel(cm.getCreatedAt() != null ? sdf.format(cm.getCreatedAt()) : "");
-                time.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                time.setFont(new Font("Arial", Font.PLAIN, 10));
                 time.setForeground(TEXT_SEC);
                 textBlock.add(author);
                 textBlock.add(body);
@@ -658,7 +808,7 @@ public class TaskDetailDialog extends JDialog {
 
     private JLabel fieldLabel(String text) {
         JLabel l = new JLabel(text.toUpperCase());
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setFont(new Font("Arial", Font.BOLD, 10));
         l.setForeground(TEXT_SEC);
         return l;
     }
@@ -668,7 +818,7 @@ public class TaskDetailDialog extends JDialog {
         tf.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER),
                 new EmptyBorder(7, 10, 7, 10)));
-        tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tf.setFont(new Font("Arial", Font.PLAIN, 13));
     }
 
     private JPanel fieldGroupSmall(String label, JComponent input) {

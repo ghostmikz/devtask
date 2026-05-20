@@ -95,8 +95,10 @@ public class ClientHandler implements Runnable {
                 case "GET_ALL_USERS"     -> handleGetAllUsers(req);
                 case "ASSIGN_USER"       -> handleAssignUser(req);
                 case "REMOVE_ASSIGNEE"   -> handleRemoveAssignee(req);
-                case "GET_LABELS"        -> handleGetLabels(req);
-                case "ADD_LABEL_TO_TASK" -> handleAddLabelToTask(req);
+                case "GET_LABELS"             -> handleGetLabels(req);
+                case "ADD_LABEL_TO_TASK"      -> handleAddLabelToTask(req);
+                case "REMOVE_LABEL_FROM_TASK" -> handleRemoveLabelFromTask(req);
+                case "CREATE_LABEL"           -> handleCreateLabel(req);
                 case "ADD_COMMENT"       -> handleAddComment(req);
                 case "GET_REPORT_DATA"   -> handleGetReportData(req);
                 case "UPDATE_PROFILE"       -> handleUpdateProfile(req);
@@ -343,6 +345,20 @@ public class ClientHandler implements Runnable {
         int[] ids = (int[]) req.getPayload(); // [taskId, labelId]
         labelDAO.addLabelToTask(ids[0], ids[1]);
         return Response.ok(req.getRequestId(), null);
+    }
+
+    private Response handleRemoveLabelFromTask(Request req) throws Exception {
+        requireAuth(req);
+        int[] ids = (int[]) req.getPayload(); // [taskId, labelId]
+        labelDAO.removeLabelFromTask(ids[0], ids[1]);
+        return Response.ok(req.getRequestId(), null);
+    }
+
+    private Response handleCreateLabel(Request req) throws Exception {
+        requireAuth(req);
+        Label l = (Label) req.getPayload();
+        Label created = labelDAO.createLabel(l.getProjectId(), l.getName(), l.getColor());
+        return Response.ok(req.getRequestId(), created);
     }
 
     // ── comments ─────────────────────────────────────────────────────────────

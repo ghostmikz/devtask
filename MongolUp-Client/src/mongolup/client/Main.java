@@ -37,13 +37,16 @@ public class Main {
         I18n.setLocale(lang);
 
         // 4. Connect to server
+//        String host = cfg.getProperty("server.host", "192.168.60.113");
         String host = cfg.getProperty("server.host", "localhost");
         int port;
+        
         try { port = Integer.parseInt(cfg.getProperty("server.port", "9090")); }
         catch (NumberFormatException e) { port = 9090; }
 
         final String fHost = host;
         final int fPort = port;
+        System.out.println("Connecting to " + fHost + ":" + fPort);
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -71,6 +74,6 @@ public class Main {
         UIManager.put("Component.arc",                  7);
         UIManager.put("ScrollBar.width",                6);
         UIManager.put("defaultFont",
-                new Font("Segoe UI", Font.PLAIN, 13));
+                new Font("Arial", Font.PLAIN, 13));
     }
 }

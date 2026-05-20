@@ -15,7 +15,7 @@ public class AvatarLabel extends JLabel {
         this.size = size;
         setOpaque(false);
         setForeground(Color.WHITE);
-        setFont(new Font("Segoe UI", Font.BOLD, size / 3));
+        setFont(new Font("Arial", Font.BOLD, size / 3));
         setPreferredSize(new Dimension(size, size));
         setMinimumSize(new Dimension(size, size));
         setMaximumSize(new Dimension(size, size));
