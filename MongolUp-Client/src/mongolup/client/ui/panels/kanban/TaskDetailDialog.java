@@ -384,24 +384,36 @@ public class TaskDetailDialog extends JDialog {
     private void showAssigneeDialog() {
         new SwingWorker<List<User>, Void>() {
             @Override protected List<User> doInBackground() throws Exception {
-                var r = ServerConnection.getInstance()
-                        .send("GET_USERS", task.getProjectId());
+                // GET_ALL_USERS — shows every active user, not just current project members
+                var r = ServerConnection.getInstance().send("GET_ALL_USERS", null);
                 return r.isSuccess() ? (List<User>) r.getData() : List.of();
             }
             @Override protected void done() {
                 try {
                     List<User> users = get();
-                    if (users.isEmpty()) { return; }
-                    User chosen = (User) JOptionPane.showInputDialog(
+                    if (users.isEmpty()) return;
+                    // Build display-friendly labels: "Full Name (username)"
+                    String[] labels = users.stream()
+                            .map(u -> (u.getFullName() != null && !u.getFullName().isBlank()
+                                    ? u.getFullName() : u.getUsername())
+                                    + " (@" + u.getUsername() + ")")
+                            .toArray(String[]::new);
+                    String chosen = (String) JOptionPane.showInputDialog(
                             TaskDetailDialog.this,
                             I18n.t("task.assignees"),
                             I18n.t("btn.add"),
                             JOptionPane.PLAIN_MESSAGE, null,
-                            users.toArray(), users.get(0));
+                            labels, labels[0]);
                     if (chosen == null) return;
-                    ServerConnection.getInstance().send("ASSIGN_USER",
-                            new int[]{task.getTaskId(), chosen.getUserId()});
-                    loadDetail();
+                    // Map chosen label back to User
+                    for (int i = 0; i < labels.length; i++) {
+                        if (labels[i].equals(chosen)) {
+                            ServerConnection.getInstance().send("ASSIGN_USER",
+                                    new int[]{task.getTaskId(), users.get(i).getUserId()});
+                            loadDetail();
+                            break;
+                        }
+                    }
                 } catch (Exception ignored) {}
             }
         }.execute();

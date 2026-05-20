@@ -1,8 +1,10 @@
 package mongolup.client.ui;
 
 import mongolup.client.AppContext;
+import mongolup.client.ServerConnection;
 import mongolup.client.i18n.I18n;
 import mongolup.server.model.Project;
+import mongolup.server.model.User;
 import mongolup.client.ui.components.AvatarLabel;
 
 import javax.imageio.ImageIO;
@@ -39,6 +41,7 @@ public class SidebarPanel extends JPanel {
     private final List<JPanel>     projItems       = new ArrayList<>();
     private JPanel                 projectListPanel;
     private String                 activeNav       = "";
+    private List<User>             teamMembers     = new ArrayList<>();
 
     public SidebarPanel(Consumer<String> pageCallback) {
         this.pageCallback = pageCallback;
@@ -48,6 +51,7 @@ public class SidebarPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         build();
         I18n.onLocaleChange(this::rebuild);
+        AppContext.getInstance().addProjectChangeListener(this::loadTeamMembers);
     }
 
 
@@ -226,17 +230,44 @@ public class SidebarPanel extends JPanel {
 
     private void addTeamSection() {
         addSection(I18n.t("nav.team"));
-        AppContext ctx = AppContext.getInstance();
-        if (ctx.getCurrentUser() != null) addMember(ctx.getCurrentUser());
+        if (teamMembers.isEmpty()) {
+            // Fallback: at least show current user while members load
+            User me = AppContext.getInstance().getCurrentUser();
+            if (me != null) addMember(me);
+        } else {
+            for (User u : teamMembers) addMember(u);
+        }
     }
 
-    private void addMember(mongolup.server.model.User u) {
+    /** Fetches project members from the server and rebuilds the sidebar. */
+    @SuppressWarnings("unchecked")
+    private void loadTeamMembers() {
+        Project p = AppContext.getInstance().getCurrentProject();
+        if (p == null) return;
+        new javax.swing.SwingWorker<List<User>, Void>() {
+            @Override protected List<User> doInBackground() throws Exception {
+                var r = ServerConnection.getInstance().send("GET_USERS", p.getProjectId());
+                return r.isSuccess() ? (List<User>) r.getData() : List.of();
+            }
+            @Override protected void done() {
+                try {
+                    teamMembers = new ArrayList<>(get());
+                } catch (Exception ignored) {
+                    teamMembers = new ArrayList<>();
+                }
+                rebuild();
+            }
+        }.execute();
+    }
+
+    private void addMember(User u) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         row.setBackground(BG);
         row.setMaximumSize(new Dimension(220, 38));
         row.setAlignmentX(LEFT_ALIGNMENT);
         Color aColor = avatarColor(u.getUserId());
-        AvatarLabel av = new AvatarLabel(u.getInitials(), aColor, 26);
+        AvatarLabel av = new AvatarLabel(
+                u.getInitials() != null ? u.getInitials() : "?", aColor, 26);
         JLabel name = new JLabel(u.getFullName() != null ? u.getFullName() : u.getUsername());
         name.setForeground(TEXT_DIM);
         name.setFont(new Font("Segoe UI", Font.PLAIN, 12));
